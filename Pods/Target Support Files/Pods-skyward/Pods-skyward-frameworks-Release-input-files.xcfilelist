@@ -1,0 +1,16 @@
+${PODS_ROOT}/Target Support Files/Pods-skyward/Pods-skyward-frameworks.sh
+${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework
+${BUILT_PRODUCTS_DIR}/CocoaMQTT/CocoaMQTT.framework
+${BUILT_PRODUCTS_DIR}/ModuleBootstrap/ModuleBootstrap.framework
+${BUILT_PRODUCTS_DIR}/ModuleHome/ModuleHome.framework
+${BUILT_PRODUCTS_DIR}/ModuleLogin/ModuleLogin.framework
+${BUILT_PRODUCTS_DIR}/ModuleMessage/ModuleMessage.framework
+${BUILT_PRODUCTS_DIR}/Moya/Moya.framework
+${BUILT_PRODUCTS_DIR}/MqttCocoaAsyncSocket/MqttCocoaAsyncSocket.framework
+${BUILT_PRODUCTS_DIR}/SWKit/SWKit.framework
+${BUILT_PRODUCTS_DIR}/SWNetwork/SWNetwork.framework
+${BUILT_PRODUCTS_DIR}/SWTheme/SWTheme.framework
+${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework
+${BUILT_PRODUCTS_DIR}/TXCacheKit/TXCacheKit.framework
+${BUILT_PRODUCTS_DIR}/TXKit/TXKit.framework
+${BUILT_PRODUCTS_DIR}/TXRouterKit/TXRouterKit.framework

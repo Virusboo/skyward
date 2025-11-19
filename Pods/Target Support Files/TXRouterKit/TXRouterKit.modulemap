@@ -1,0 +1,6 @@
+framework module TXRouterKit {
+  umbrella header "TXRouterKit-umbrella.h"
+
+  export *
+  module * { export * }
+}

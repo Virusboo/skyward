@@ -1,0 +1,6 @@
+framework module Pods_TXCacheKit_Tests {
+  umbrella header "Pods-TXCacheKit_Tests-umbrella.h"
+
+  export *
+  module * { export * }
+}

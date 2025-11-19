@@ -1,0 +1,16 @@
+PODS:
+  - TXRouterKit (0.1.0)
+
+DEPENDENCIES:
+  - TXRouterKit (from `../`)
+
+EXTERNAL SOURCES:
+  TXRouterKit:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  TXRouterKit: 7206ea9db726db0c8e98fa7d6e431370f21a6391
+
+PODFILE CHECKSUM: bde538b2d172414ecf455e3f761a2c2a65a21b4a
+
+COCOAPODS: 1.16.2

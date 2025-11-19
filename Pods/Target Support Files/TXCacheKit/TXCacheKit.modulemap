@@ -1,0 +1,6 @@
+framework module TXCacheKit {
+  umbrella header "TXCacheKit-umbrella.h"
+
+  export *
+  module * { export * }
+}

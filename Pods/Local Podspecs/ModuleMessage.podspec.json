@@ -1,0 +1,35 @@
+{
+  "name": "ModuleMessage",
+  "version": "0.1.0",
+  "summary": "A short description of ModuleMessage.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/赵波/ModuleMessage",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "赵波": "zbo900801@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/赵波/ModuleMessage.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "13.0"
+  },
+  "source_files": "ModuleMessage/Classes/**/*",
+  "resource_bundles": {
+    "ModuleMessage": [
+      "ModuleMessage/Assets/*.xcassets"
+    ]
+  },
+  "dependencies": {
+    "SnapKit": [],
+    "TXKit": [],
+    "TXRouterKit": [],
+    "SWKit": [],
+    "SWTheme": [],
+    "SWNetwork": []
+  }
+}

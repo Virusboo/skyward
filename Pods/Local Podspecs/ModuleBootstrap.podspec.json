@@ -1,0 +1,29 @@
+{
+  "name": "ModuleBootstrap",
+  "version": "0.1.0",
+  "summary": "A short description of ModuleBootstrap.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/赵波/ModuleBootstrap",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "赵波": "zbo900801@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/赵波/ModuleBootstrap.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "13.0"
+  },
+  "source_files": "ModuleBootstrap/Classes/**/*",
+  "dependencies": {
+    "SWKit": [],
+    "SWTheme": [],
+    "ModuleHome": [],
+    "ModuleLogin": [],
+    "ModuleMessage": []
+  }
+}

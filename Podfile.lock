@@ -1,0 +1,123 @@
+PODS:
+  - Alamofire (5.10.2)
+  - CocoaMQTT (2.1.6):
+    - CocoaMQTT/Core (= 2.1.6)
+  - CocoaMQTT/Core (2.1.6):
+    - MqttCocoaAsyncSocket (~> 1.0.8)
+  - ModuleBootstrap (0.1.0):
+    - ModuleHome
+    - ModuleLogin
+    - ModuleMessage
+    - SWKit
+    - SWTheme
+  - ModuleHome (0.1.0):
+    - SnapKit
+    - SWKit
+    - SWNetwork
+    - SWTheme
+    - TXKit
+    - TXRouterKit
+  - ModuleLogin (1.0.0):
+    - SnapKit
+    - TXKit
+  - ModuleMessage (0.1.0):
+    - SnapKit
+    - SWKit
+    - SWNetwork
+    - SWTheme
+    - TXKit
+    - TXRouterKit
+  - Moya (15.0.0):
+    - Moya/Core (= 15.0.0)
+  - Moya/Combine (15.0.0):
+    - Moya/Core
+  - Moya/Core (15.0.0):
+    - Alamofire (~> 5.0)
+  - MqttCocoaAsyncSocket (1.0.8)
+  - SnapKit (5.7.1)
+  - SWKit (0.1.0):
+    - Moya
+    - SWKit/Assets (= 0.1.0)
+    - SWTheme
+    - TXCacheKit
+    - TXKit
+  - SWKit/Assets (0.1.0):
+    - Moya
+    - SWTheme
+    - TXCacheKit
+    - TXKit
+  - SWNetwork (0.1.0):
+    - CocoaMQTT
+    - Moya
+  - SWTheme (0.1.0):
+    - TXKit
+  - TXCacheKit (0.1.0)
+  - TXKit (0.1.0):
+    - TXRouterKit
+  - TXRouterKit (0.1.0)
+
+DEPENDENCIES:
+  - CocoaMQTT
+  - ModuleBootstrap (from `./skyward/Modules/Features/ModuleBootstrap`)
+  - ModuleHome (from `./skyward/Modules/Features/ModuleHome`)
+  - ModuleLogin (from `./skyward/Modules/Features/ModuleLogin`)
+  - ModuleMessage (from `./skyward/Modules/Features/ModuleMessage`)
+  - Moya (~> 15.0)
+  - Moya/Combine
+  - SWKit (from `./skyward/Modules/Common/SWKit`)
+  - SWNetwork (from `./skyward/Modules/Common/SWNetwork`)
+  - SWTheme (from `./skyward/Modules/Common/SWTheme`)
+  - TXCacheKit (from `./skyward/Modules/Base/TXCacheKit`)
+  - TXKit (from `./skyward/Modules/Base/TXKit`)
+  - TXRouterKit (from `./skyward/Modules/Base/TXRouterKit`)
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - CocoaMQTT
+    - Moya
+    - MqttCocoaAsyncSocket
+    - SnapKit
+
+EXTERNAL SOURCES:
+  ModuleBootstrap:
+    :path: "./skyward/Modules/Features/ModuleBootstrap"
+  ModuleHome:
+    :path: "./skyward/Modules/Features/ModuleHome"
+  ModuleLogin:
+    :path: "./skyward/Modules/Features/ModuleLogin"
+  ModuleMessage:
+    :path: "./skyward/Modules/Features/ModuleMessage"
+  SWKit:
+    :path: "./skyward/Modules/Common/SWKit"
+  SWNetwork:
+    :path: "./skyward/Modules/Common/SWNetwork"
+  SWTheme:
+    :path: "./skyward/Modules/Common/SWTheme"
+  TXCacheKit:
+    :path: "./skyward/Modules/Base/TXCacheKit"
+  TXKit:
+    :path: "./skyward/Modules/Base/TXKit"
+  TXRouterKit:
+    :path: "./skyward/Modules/Base/TXRouterKit"
+
+SPEC CHECKSUMS:
+  Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
+  CocoaMQTT: 1f206228b29318eabdacad0c2e4e88575922c27a
+  ModuleBootstrap: d34e6b029ea1f087af75df1d80ebc858dcd0854c
+  ModuleHome: 782825f5a0fa4b463fe9b63a93018900cf541d80
+  ModuleLogin: f5f7891ab880e5ef10b5c9426f94e9a13fd53821
+  ModuleMessage: e2e4e7ae6622b671419b65c01d5dbe20492bb92f
+  Moya: 138f0573e53411fb3dc17016add0b748dfbd78ee
+  MqttCocoaAsyncSocket: 77d3b74f76228dd5a05d1f9526eab101d415b30c
+  SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
+  SWKit: 8145f9c92eeec0c2bb7d75c3dc209d6cd56fc7de
+  SWNetwork: da7cf1b30c82c2a5caca9d8874f8da70337654b1
+  SWTheme: fef9e4b842b3b6de90e358a93aaa416ac7ea96e3
+  TXCacheKit: 943025578393e60e4e4dde7ce93de9dc17e1f171
+  TXKit: 98e7d11434bc23f4ff66b64636bebaf6ad6dfffc
+  TXRouterKit: 7206ea9db726db0c8e98fa7d6e431370f21a6391
+
+PODFILE CHECKSUM: 05ff7c8b07a8b69ec75dcbf0a625265d37f59178
+
+COCOAPODS: 1.16.2

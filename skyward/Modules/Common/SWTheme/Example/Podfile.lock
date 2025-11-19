@@ -1,0 +1,16 @@
+PODS:
+  - SWTheme (0.1.0)
+
+DEPENDENCIES:
+  - SWTheme (from `../`)
+
+EXTERNAL SOURCES:
+  SWTheme:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  SWTheme: 4c5ec9315e5ee77d03eee5b0e350e2183175a21a
+
+PODFILE CHECKSUM: 1154c9f6d1ee855e45ba7cfcacde4704c9c76fc8
+
+COCOAPODS: 1.16.2

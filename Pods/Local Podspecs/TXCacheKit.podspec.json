@@ -1,0 +1,27 @@
+{
+  "name": "TXCacheKit",
+  "version": "0.1.0",
+  "summary": "A short description of TXCacheKit.",
+  "description": "TODO: Add long description of the pod here.",
+  "homepage": "https://github.com/赵波/TXCacheKit",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "赵波": "zbo900801@gmail.com"
+  },
+  "source": {
+    "git": "https://github.com/赵波/TXCacheKit.git",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "10.0"
+  },
+  "source_files": "TXCacheKit/Classes/**/*",
+  "resource_bundles": {
+    "TXCacheKit": [
+      "TXCacheKit/Assets/PrivacyInfo.xcprivacy"
+    ]
+  }
+}

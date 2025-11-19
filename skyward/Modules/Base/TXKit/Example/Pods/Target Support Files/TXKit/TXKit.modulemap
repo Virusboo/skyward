@@ -1,0 +1,6 @@
+framework module TXKit {
+  umbrella header "TXKit-umbrella.h"
+
+  export *
+  module * { export * }
+}

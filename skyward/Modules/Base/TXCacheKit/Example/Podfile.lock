@@ -1,0 +1,16 @@
+PODS:
+  - TXCacheKit (0.1.0)
+
+DEPENDENCIES:
+  - TXCacheKit (from `../`)
+
+EXTERNAL SOURCES:
+  TXCacheKit:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  TXCacheKit: 943025578393e60e4e4dde7ce93de9dc17e1f171
+
+PODFILE CHECKSUM: 77b29dcbf25e17382516fe23f2192bbc86b98a0c
+
+COCOAPODS: 1.16.2

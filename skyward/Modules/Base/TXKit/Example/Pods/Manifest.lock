@@ -1,0 +1,16 @@
+PODS:
+  - TXKit (0.1.0)
+
+DEPENDENCIES:
+  - TXKit (from `../`)
+
+EXTERNAL SOURCES:
+  TXKit:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  TXKit: 672cbeefb74be13dde00184027fd06249782e7cd
+
+PODFILE CHECKSUM: b6280243902ea5c0f0bc4743be71784beb85986d
+
+COCOAPODS: 1.16.2

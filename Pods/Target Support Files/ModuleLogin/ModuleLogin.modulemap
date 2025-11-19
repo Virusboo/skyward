@@ -1,0 +1,6 @@
+framework module ModuleLogin {
+  umbrella header "ModuleLogin-umbrella.h"
+
+  export *
+  module * { export * }
+}

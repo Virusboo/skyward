@@ -1,0 +1,16 @@
+PODS:
+  - ModuleBootstrap (0.1.0)
+
+DEPENDENCIES:
+  - ModuleBootstrap (from `../`)
+
+EXTERNAL SOURCES:
+  ModuleBootstrap:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  ModuleBootstrap: 705995327b16e50f61146ff0041cf759ef973060
+
+PODFILE CHECKSUM: b502acf21ddad902bcb474487a997af76ca71151
+
+COCOAPODS: 1.16.2

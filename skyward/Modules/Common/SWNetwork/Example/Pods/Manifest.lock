@@ -1,0 +1,29 @@
+PODS:
+  - Alamofire (5.10.2)
+  - Moya (15.0.0):
+    - Moya/Core (= 15.0.0)
+  - Moya/Core (15.0.0):
+    - Alamofire (~> 5.0)
+  - SWNetwork (0.1.0):
+    - Moya
+
+DEPENDENCIES:
+  - SWNetwork (from `../`)
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - Moya
+
+EXTERNAL SOURCES:
+  SWNetwork:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
+  Moya: 138f0573e53411fb3dc17016add0b748dfbd78ee
+  SWNetwork: 3fe0f002644f4a1ccfbf01c1dd9756123a0bba8b
+
+PODFILE CHECKSUM: b2c4f5033e1e27a6b6b8d8f0dd18a7af8af26edd
+
+COCOAPODS: 1.16.2

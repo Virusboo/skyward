@@ -1,0 +1,6 @@
+framework module ModuleHome {
+  umbrella header "ModuleHome-umbrella.h"
+
+  export *
+  module * { export * }
+}

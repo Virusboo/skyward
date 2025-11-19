@@ -1,0 +1,6 @@
+framework module SWTheme {
+  umbrella header "SWTheme-umbrella.h"
+
+  export *
+  module * { export * }
+}

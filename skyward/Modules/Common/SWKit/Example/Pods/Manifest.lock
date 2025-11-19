@@ -1,0 +1,16 @@
+PODS:
+  - SWKit (0.1.0)
+
+DEPENDENCIES:
+  - SWKit (from `../`)
+
+EXTERNAL SOURCES:
+  SWKit:
+    :path: "../"
+
+SPEC CHECKSUMS:
+  SWKit: 742d04141487d58b61ebca9342c274fec3aade5e
+
+PODFILE CHECKSUM: dd9013643bb30ffd89ffcb04b11bf180786890b4
+
+COCOAPODS: 1.16.2
