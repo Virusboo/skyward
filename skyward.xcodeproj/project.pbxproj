@@ -7,17 +7,31 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B4886CCD2EFA95D60013C412 /* Citys.plist in Resources */ = {isa = PBXBuildFile; fileRef = B4886CCC2EFA95D60013C412 /* Citys.plist */; };
+		B4886CDA2EFB950F0013C412 /* PrivacyPolicy.html in Resources */ = {isa = PBXBuildFile; fileRef = B4886CD82EFB950F0013C412 /* PrivacyPolicy.html */; };
+		B4886CDB2EFB950F0013C412 /* UserAgreement.html in Resources */ = {isa = PBXBuildFile; fileRef = B4886CD92EFB950F0013C412 /* UserAgreement.html */; };
+		B4A323782EE18AF400A5EEEF /* DroidSansFallback.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B4A323772EE18AF400A5EEEF /* DroidSansFallback.ttf */; };
+		B4B702822EE82DB5006C618B /* scene3d.yaml in Resources */ = {isa = PBXBuildFile; fileRef = B4B702812EE82DB5006C618B /* scene3d.yaml */; };
+		B4BEB8E82F0F5E220056BEB1 /* dahaidao.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = B4BEB8E72F0F5E220056BEB1 /* dahaidao.mbtiles */; };
+		B4D3CBE72ED3EAD7006D0305 /* scanning.json in Resources */ = {isa = PBXBuildFile; fileRef = B4D3CBE62ED3EAD7006D0305 /* scanning.json */; };
+		B4F6F9AD2EEAEB150057FD79 /* Pods_skyward.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 889022F314AC7D1EDC63439F /* Pods_skyward.framework */; };
 		F26143632EC30FFB0018F242 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F26143622EC30FFB0018F242 /* PrivacyInfo.xcprivacy */; };
 		F26143B32EC31A020018F242 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F26143AE2EC31A020018F242 /* Assets.xcassets */; };
 		F26143BA2EC31A020018F242 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F26143AD2EC31A020018F242 /* AppDelegate.swift */; };
 		F26144902EC6BBEE0018F242 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F261448F2EC6BBEE0018F242 /* Launch Screen.storyboard */; };
-		F2D7C5296C292F6223979B1E /* Pods_skyward.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 889022F314AC7D1EDC63439F /* Pods_skyward.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		1CD17FB7FB8F7D90131AB7D9 /* Pods-skyward.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-skyward.debug.xcconfig"; path = "Target Support Files/Pods-skyward/Pods-skyward.debug.xcconfig"; sourceTree = "<group>"; };
 		889022F314AC7D1EDC63439F /* Pods_skyward.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_skyward.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		88EBD98ADA6305CAAD57F062 /* Pods-skyward.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-skyward.release.xcconfig"; path = "Target Support Files/Pods-skyward/Pods-skyward.release.xcconfig"; sourceTree = "<group>"; };
+		B4886CCC2EFA95D60013C412 /* Citys.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Citys.plist; sourceTree = "<group>"; };
+		B4886CD82EFB950F0013C412 /* PrivacyPolicy.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = PrivacyPolicy.html; sourceTree = "<group>"; };
+		B4886CD92EFB950F0013C412 /* UserAgreement.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = UserAgreement.html; sourceTree = "<group>"; };
+		B4A323772EE18AF400A5EEEF /* DroidSansFallback.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DroidSansFallback.ttf; sourceTree = "<group>"; };
+		B4B702812EE82DB5006C618B /* scene3d.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = scene3d.yaml; sourceTree = "<group>"; };
+		B4BEB8E72F0F5E220056BEB1 /* dahaidao.mbtiles */ = {isa = PBXFileReference; lastKnownFileType = file; path = dahaidao.mbtiles; sourceTree = "<group>"; };
+		B4D3CBE62ED3EAD7006D0305 /* scanning.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = scanning.json; sourceTree = "<group>"; };
 		F261434C2EC303EA0018F242 /* skyward.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = skyward.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F26143622EC30FFB0018F242 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		F26143AD2EC31A020018F242 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -32,7 +46,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F2D7C5296C292F6223979B1E /* Pods_skyward.framework in Frameworks */,
+				B4F6F9AD2EEAEB150057FD79 /* Pods_skyward.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -80,6 +94,13 @@
 			children = (
 				F261450A2ECB19510018F242 /* Info.plist */,
 				F26143AD2EC31A020018F242 /* AppDelegate.swift */,
+				B4D3CBE62ED3EAD7006D0305 /* scanning.json */,
+				B4A323772EE18AF400A5EEEF /* DroidSansFallback.ttf */,
+				B4BEB8E72F0F5E220056BEB1 /* dahaidao.mbtiles */,
+				B4B702812EE82DB5006C618B /* scene3d.yaml */,
+				B4886CCC2EFA95D60013C412 /* Citys.plist */,
+				B4886CD82EFB950F0013C412 /* PrivacyPolicy.html */,
+				B4886CD92EFB950F0013C412 /* UserAgreement.html */,
 				F26143AE2EC31A020018F242 /* Assets.xcassets */,
 				F26143B02EC31A020018F242 /* skyward.entitlements */,
 				F261448F2EC6BBEE0018F242 /* Launch Screen.storyboard */,
@@ -149,8 +170,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				F26144902EC6BBEE0018F242 /* Launch Screen.storyboard in Resources */,
+				B4886CCD2EFA95D60013C412 /* Citys.plist in Resources */,
+				B4A323782EE18AF400A5EEEF /* DroidSansFallback.ttf in Resources */,
+				B4BEB8E82F0F5E220056BEB1 /* dahaidao.mbtiles in Resources */,
 				F26143B32EC31A020018F242 /* Assets.xcassets in Resources */,
+				B4D3CBE72ED3EAD7006D0305 /* scanning.json in Resources */,
+				B4B702822EE82DB5006C618B /* scene3d.yaml in Resources */,
 				F26143632EC30FFB0018F242 /* PrivacyInfo.xcprivacy in Resources */,
+				B4886CDA2EFB950F0013C412 /* PrivacyPolicy.html in Resources */,
+				B4886CDB2EFB950F0013C412 /* UserAgreement.html in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -331,35 +359,57 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = skyward/skyward.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 7S86Y9Q83J;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/skyward",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = skyward/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = skyward;
+				INFOPLIST_KEY_CFBundleDisplayName = "行者Dev";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要蓝牙权限来连接您的设备";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "需要蓝牙权限来连接您的设备";
+				INFOPLIST_KEY_NSCameraUsageDescription = "需要使用您的相机获取图片用于头像更新";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "需要访问WiFi信息以获取网络状态";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "需要在后台获取您的位置信息，以便提供实时位置跟踪和紧急求助功能";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "需要获取您的位置信息，以便提供位置服务和紧急求助功能";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要获取您的位置信息，以便提供位置服务和紧急求助功能";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "需要使用您的相册获取图片用于兴趣点记录，头像更新";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "需要使用您的相册获取图片用于兴趣点记录，头像更新";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
+				INFOPLIST_KEY_UIStatusBarHidden = NO;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
-				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks\"";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.txts.skyward;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -370,35 +420,57 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = skyward/skyward.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
+				DEVELOPMENT_TEAM = 7S86Y9Q83J;
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = NO;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/skyward",
+				);
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = skyward/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = skyward;
+				INFOPLIST_KEY_CFBundleDisplayName = "行者Dev";
+				INFOPLIST_KEY_NSBluetoothAlwaysUsageDescription = "需要蓝牙权限来连接您的设备";
+				INFOPLIST_KEY_NSBluetoothPeripheralUsageDescription = "需要蓝牙权限来连接您的设备";
+				INFOPLIST_KEY_NSCameraUsageDescription = "需要使用您的相机获取图片用于头像更新";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "需要访问WiFi信息以获取网络状态";
+				INFOPLIST_KEY_NSLocationAlwaysAndWhenInUseUsageDescription = "需要在后台获取您的位置信息，以便提供实时位置跟踪和紧急求助功能";
+				INFOPLIST_KEY_NSLocationAlwaysUsageDescription = "需要获取您的位置信息，以便提供位置服务和紧急求助功能";
+				INFOPLIST_KEY_NSLocationWhenInUseUsageDescription = "需要获取您的位置信息，以便提供位置服务和紧急求助功能";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "需要使用您的相册获取图片用于兴趣点记录，头像更新";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "需要使用您的相册获取图片用于兴趣点记录，头像更新";
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSceneManifest_Generation[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents[sdk=iphonesimulator*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphoneos*]" = YES;
 				"INFOPLIST_KEY_UILaunchScreen_Generation[sdk=iphonesimulator*]" = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = "Launch Screen";
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
+				INFOPLIST_KEY_UIStatusBarHidden = NO;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphoneos*]" = UIStatusBarStyleDefault;
 				"INFOPLIST_KEY_UIStatusBarStyle[sdk=iphonesimulator*]" = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
-				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = "@executable_path/Frameworks\"";
 				"LD_RUNPATH_SEARCH_PATHS[sdk=macosx*]" = "@executable_path/../Frameworks";
-				MARKETING_VERSION = 1.0;
+				MARKETING_VERSION = 1.0.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.txts.skyward;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				REGISTER_APP_GROUPS = YES;
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

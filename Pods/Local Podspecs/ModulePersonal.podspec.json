@@ -1,0 +1,44 @@
+{
+  "name": "ModulePersonal",
+  "version": "0.1.0",
+  "summary": "Personal module for TXTS app",
+  "description": "Personal module including device management and profile features.",
+  "homepage": "http://localhost/ModulePersonal",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Your Name": "your@email.com"
+  },
+  "source": {
+    "git": "",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "13.0"
+  },
+  "swift_versions": "5.0",
+  "source_files": "ModulePersonal/Classes/**/*",
+  "resource_bundles": {
+    "ModulePersonal": [
+      "ModulePersonal/Assets/*.xcassets"
+    ]
+  },
+  "frameworks": [
+    "UIKit",
+    "CoreBluetooth"
+  ],
+  "dependencies": {
+    "SnapKit": [],
+    "TXKit": [],
+    "TXRouterKit": [],
+    "SWKit": [],
+    "SWTheme": [],
+    "SWNetwork": [],
+    "lottie-ios": [],
+    "SDWebImage": [],
+    "ModuleLogin": []
+  },
+  "swift_version": "5.0"
+}

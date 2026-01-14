@@ -1,0 +1,44 @@
+{
+  "name": "ModuleMap",
+  "version": "0.1.0",
+  "summary": "Map module for TXTS app",
+  "description": "Map module including device management and profile features.",
+  "homepage": "http://localhost/ModuleMap",
+  "license": {
+    "type": "MIT",
+    "file": "LICENSE"
+  },
+  "authors": {
+    "Your Name": "your@email.com"
+  },
+  "source": {
+    "git": "",
+    "tag": "0.1.0"
+  },
+  "platforms": {
+    "ios": "13.0"
+  },
+  "swift_versions": "5.0",
+  "source_files": "ModuleMap/Classes/**/*",
+  "resource_bundles": {
+    "ModuleMap": [
+      "ModuleMap/Assets/*"
+    ]
+  },
+  "frameworks": [
+    "UIKit",
+    "CoreBluetooth",
+    "CoreLocation"
+  ],
+  "dependencies": {
+    "SnapKit": [],
+    "WCDB.swift": [],
+    "TXKit": [],
+    "TXRouterKit": [],
+    "SWKit": [],
+    "SWTheme": [],
+    "SWNetwork": [],
+    "SDWebImage": []
+  },
+  "swift_version": "5.0"
+}

@@ -1,5 +1,5 @@
 # Uncomment the next line to define a global platform for your project
-platform :ios, '13.0'
+platform :ios, '15.0'
 
 # 项目名称
 target 'skyward' do
@@ -10,8 +10,12 @@ target 'skyward' do
   pod 'Moya', '~> 15.0'
   # 可选：如果需要Combine支持，可以添加
   pod 'Moya/Combine'
+  pod 'lottie-ios'
+  pod 'SDWebImage', '~> 5.0'
   
   pod 'CocoaMQTT'
+  
+  pod 'WCDB.swift'
   
   # 本地模块
 #  pod 'TXKit', :path => '../TXKit'
@@ -30,6 +34,9 @@ target 'skyward' do
   pod 'ModuleMessage', :path => './skyward/Modules/Features/ModuleMessage'
   pod 'ModuleBootstrap', :path => './skyward/Modules/Features/ModuleBootstrap'
   pod 'ModuleLogin', :path => './skyward/Modules/Features/ModuleLogin'
+  pod 'ModulePersonal', :path => './skyward/Modules/Features/ModulePersonal'
+  pod 'ModuleMap', :path => './skyward/Modules/Features/ModuleMap'
+  pod 'ModuleTeam', :path => './skyward/Modules/Features/ModuleTeam'
 
 end
 
@@ -37,7 +44,7 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     target.build_configurations.each do |config|
-      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '15.0'
     end
   end
 end

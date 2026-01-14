@@ -1,0 +1,6 @@
+framework module ModuleTeam {
+  umbrella header "ModuleTeam-umbrella.h"
+
+  export *
+  module * { export * }
+}
