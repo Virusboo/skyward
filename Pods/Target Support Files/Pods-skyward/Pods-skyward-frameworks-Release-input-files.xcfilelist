@@ -4,9 +4,13 @@ ${BUILT_PRODUCTS_DIR}/CocoaMQTT/CocoaMQTT.framework
 ${BUILT_PRODUCTS_DIR}/ModuleBootstrap/ModuleBootstrap.framework
 ${BUILT_PRODUCTS_DIR}/ModuleHome/ModuleHome.framework
 ${BUILT_PRODUCTS_DIR}/ModuleLogin/ModuleLogin.framework
+${BUILT_PRODUCTS_DIR}/ModuleMap/ModuleMap.framework
 ${BUILT_PRODUCTS_DIR}/ModuleMessage/ModuleMessage.framework
+${BUILT_PRODUCTS_DIR}/ModulePersonal/ModulePersonal.framework
+${BUILT_PRODUCTS_DIR}/ModuleTeam/ModuleTeam.framework
 ${BUILT_PRODUCTS_DIR}/Moya/Moya.framework
 ${BUILT_PRODUCTS_DIR}/MqttCocoaAsyncSocket/MqttCocoaAsyncSocket.framework
+${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework
 ${BUILT_PRODUCTS_DIR}/SWKit/SWKit.framework
 ${BUILT_PRODUCTS_DIR}/SWNetwork/SWNetwork.framework
 ${BUILT_PRODUCTS_DIR}/SWTheme/SWTheme.framework
@@ -14,3 +18,6 @@ ${BUILT_PRODUCTS_DIR}/SnapKit/SnapKit.framework
 ${BUILT_PRODUCTS_DIR}/TXCacheKit/TXCacheKit.framework
 ${BUILT_PRODUCTS_DIR}/TXKit/TXKit.framework
 ${BUILT_PRODUCTS_DIR}/TXRouterKit/TXRouterKit.framework
+${BUILT_PRODUCTS_DIR}/WCDB.swift/WCDBSwift.framework
+${BUILT_PRODUCTS_DIR}/WCDBOptimizedSQLCipher/sqlcipher.framework
+${BUILT_PRODUCTS_DIR}/lottie-ios/Lottie.framework

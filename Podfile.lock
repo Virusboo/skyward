@@ -8,15 +8,10 @@ PODS:
   - ModuleBootstrap (0.1.0):
     - ModuleHome
     - ModuleLogin
-    - ModuleMap
     - ModuleMessage
-    - ModulePersonal
     - SWKit
-    - SWNetwork
     - SWTheme
   - ModuleHome (0.1.0):
-    - ModuleMap
-    - ModulePersonal
     - SnapKit
     - SWKit
     - SWNetwork
@@ -25,11 +20,7 @@ PODS:
     - TXRouterKit
   - ModuleLogin (1.0.0):
     - SnapKit
-    - SWKit
-    - SWNetwork
-    - SWTheme
     - TXKit
-    - TXRouterKit
   - ModuleMap (0.1.0):
     - SDWebImage
     - SnapKit
@@ -40,14 +31,12 @@ PODS:
     - TXRouterKit
     - WCDB.swift
   - ModuleMessage (0.1.0):
-    - SDWebImage
     - SnapKit
     - SWKit
     - SWNetwork
     - SWTheme
     - TXKit
     - TXRouterKit
-    - WCDB.swift
   - ModulePersonal (0.1.0):
     - lottie-ios
     - ModuleLogin
@@ -82,12 +71,15 @@ PODS:
   - SnapKit (5.7.1)
   - SWKit (0.1.0):
     - Moya
-    - SnapKit
-    - SWNetwork
+    - SWKit/Assets (= 0.1.0)
     - SWTheme
     - TXCacheKit
     - TXKit
-    - WCDB.swift
+  - SWKit/Assets (0.1.0):
+    - Moya
+    - SWTheme
+    - TXCacheKit
+    - TXKit
   - SWNetwork (0.1.0):
     - CocoaMQTT
     - Moya
@@ -166,18 +158,18 @@ SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
   CocoaMQTT: 1f206228b29318eabdacad0c2e4e88575922c27a
   lottie-ios: 96784afc26ea031d3e2b6cae342a4b8915072489
-  ModuleBootstrap: 845c31e2491e692d78bc50324c71f64af098ebf5
-  ModuleHome: 4c37539c2a051a80d4f9e52479f0c079ca766f0f
-  ModuleLogin: 0a1f25c67f21d1d63040ff033251c91e79bf370d
+  ModuleBootstrap: d34e6b029ea1f087af75df1d80ebc858dcd0854c
+  ModuleHome: 782825f5a0fa4b463fe9b63a93018900cf541d80
+  ModuleLogin: f5f7891ab880e5ef10b5c9426f94e9a13fd53821
   ModuleMap: a4b20f4035f0ba9d5a8e405c7b3f5edaa4060d21
-  ModuleMessage: aea3d5982d9ec62127a140484fe75bf74ca613ec
+  ModuleMessage: e2e4e7ae6622b671419b65c01d5dbe20492bb92f
   ModulePersonal: 24b236ef267ab7effc57d14e152deccb7a4e982c
   ModuleTeam: 12b8bdece3cdbcb7b46d3cdfcd68886d50d5d070
   Moya: 138f0573e53411fb3dc17016add0b748dfbd78ee
   MqttCocoaAsyncSocket: 77d3b74f76228dd5a05d1f9526eab101d415b30c
   SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
-  SWKit: e97a99087c031d50598f102e75f293a23a4e7b4e
+  SWKit: 8145f9c92eeec0c2bb7d75c3dc209d6cd56fc7de
   SWNetwork: da7cf1b30c82c2a5caca9d8874f8da70337654b1
   SWTheme: fef9e4b842b3b6de90e358a93aaa416ac7ea96e3
   TXCacheKit: 943025578393e60e4e4dde7ce93de9dc17e1f171
