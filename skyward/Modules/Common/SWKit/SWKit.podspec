@@ -33,12 +33,12 @@ TODO: Add long description of the pod here.
   s.source_files = 'SWKit/Classes/**/*'
   
    
-   s.subspec 'Assets' do |a|
-       a.resource_bundles = {
-         'SWKitBundle' => ['SWKit/Assets/*.xcassets']
-       }
-     end
-
+   s.resource_bundles = {
+     'SWKit' => ['SWKit/Assets/*.xcassets']
+   }
+   
+   s.vendored_frameworks = 'SWKit/Frameworks/*'
+   
   # s.public_header_files = 'Pod/Classes/**/*.h'
   # s.frameworks = 'UIKit', 'MapKit'
   # s.dependency 'AFNetworking', '~> 2.3'
@@ -46,5 +46,8 @@ TODO: Add long description of the pod here.
   s.dependency 'TXKit'
   s.dependency 'TXCacheKit'
   s.dependency 'SWTheme'
+  s.dependency 'SWNetwork'
   s.dependency 'Moya'
+  s.dependency 'SnapKit'
+  s.dependency 'WCDB.swift'
 end

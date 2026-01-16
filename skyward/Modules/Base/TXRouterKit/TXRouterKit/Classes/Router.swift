@@ -54,6 +54,8 @@ open class Router {
     /// Default instance
     public static var `default`: Router = Router()
     
+    private var tabRouteCache: [String: RoutableType.Type] = [:]
+    
     // MARK: - Registe
     
     /// Registe single RoutableType
@@ -149,6 +151,7 @@ open class Router {
         }
     }
 }
+
 
 extension UIWindow {
     

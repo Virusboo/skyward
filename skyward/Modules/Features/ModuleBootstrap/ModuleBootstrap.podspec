@@ -32,12 +32,19 @@ TODO: Add long description of the pod here.
 
   s.source_files = 'ModuleBootstrap/Classes/**/*'
   
+  s.resource_bundles = {
+    'ModuleBootstrap' => ['ModuleBootstrap/Assets/*.xcassets']
+  }
+  
   # 依赖其他模块
   s.dependency 'SWKit'
   s.dependency 'SWTheme'
+  s.dependency 'SWNetwork'
   s.dependency 'ModuleHome'
   s.dependency 'ModuleLogin'
   s.dependency 'ModuleMessage'
+  s.dependency 'ModulePersonal'
+  s.dependency 'ModuleMap'
   
   # s.resource_bundles = {
   #   'ModuleBootstrap' => ['ModuleBootstrap/Assets/*.png']

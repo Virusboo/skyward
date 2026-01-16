@@ -12,6 +12,7 @@ import UIKit
 /// 定位管理类
 public typealias LocationPermissionCompletion = (CLAuthorizationStatus) -> Void
 public typealias LocationUpdateCompletion = (CLLocation?, Error?) -> Void
+public typealias ReverseGeocodeCompletion = (CLPlacemark?, Error?) -> Void
 
 let lastLocationKey = "lastLocationKey"
 
@@ -19,6 +20,7 @@ public class LocationManager: NSObject {
     
     // MARK: - Properties
     private let locationManager = CLLocationManager()
+    private let geocoder = CLGeocoder()
     public var authorizationStatus: CLAuthorizationStatus {
         get {
             locationManager.authorizationStatus
@@ -142,6 +144,52 @@ public class LocationManager: NSObject {
             return nil
         }
         return CLLocation(latitude: lastLocationDict["latitude"]!, longitude: lastLocationDict["longitude"]!)
+    }
+
+    // MARK: - Reverse Geocoding
+    /// 反地理编码：将坐标转换为地址信息
+    /// - Parameters:
+    ///   - location: 要转换的坐标位置
+    ///   - completion: 完成回调，返回 CLPlacemark（包含地址信息）或错误
+    public func reverseGeocode(location: CLLocation, completion: @escaping ReverseGeocodeCompletion) {
+        // 取消之前的请求，避免多个请求同时进行
+        geocoder.cancelGeocode()
+
+        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
+            guard let self = self else { return }
+
+            if let error = error {
+                // 处理错误
+                debugPrint("反地理编码失败: \(error.localizedDescription)")
+                completion(nil, error)
+                return
+            }
+
+            // 获取第一个地标
+            guard let placemark = placemarks?.first else {
+                let error = NSError(domain: "LocationError", code: 103, userInfo: [NSLocalizedDescriptionKey: "未找到地址信息"])
+                completion(nil, error)
+                return
+            }
+
+            debugPrint("反地理编码成功: \(placemark.name ?? "未知位置"), \(placemark.locality ?? "")")
+            completion(placemark, nil)
+        }
+    }
+
+    /// 反地理编码：使用经纬度进行转换
+    /// - Parameters:
+    ///   - latitude: 纬度
+    ///   - longitude: 经度
+    ///   - completion: 完成回调，返回 CLPlacemark（包含地址信息）或错误
+    public func reverseGeocode(latitude: Double, longitude: Double, completion: @escaping ReverseGeocodeCompletion) {
+        let location = CLLocation(latitude: latitude, longitude: longitude)
+        reverseGeocode(location: location, completion: completion)
+    }
+
+    /// 取消当前的反地理编码请求
+    public func cancelReverseGeocode() {
+        geocoder.cancelGeocode()
     }
 }
 

@@ -12,11 +12,17 @@
  */
 
 import TXKit
+import SWKit
+import SWNetwork
 import ModuleLogin
 
 final public class Bootstrap {
     
-    private init() {}
+    private init() {
+        
+        // 暂时这样写
+        setupNotifications()
+    }
     
     public static let shared = Bootstrap()
     
@@ -36,14 +42,25 @@ final public class Bootstrap {
         }
     }
     
+    public func runLoginFlow() {
+        switchRootVC(animated: true) {
+            self.window?.rootViewController = self.loginVC()
+        }
+    }
+    
     public func runMainFlow() {
         switchRootVC(animated: true) {
-            self.window?.rootViewController = self.rootVC()
+            if UserManager.shared.isLogin {
+                self.window?.rootViewController = self.rootVC()
+            } else {
+                self.window?.rootViewController = self.loginVC()
+            }
+            
         }
     }
     
     
-    func launchVC() -> UIViewController {
+    func loginVC() -> UIViewController {
         let launchVC = LaunchViewController()
         let navi = BaseNavigationViewController(rootViewController: launchVC)
         return navi
@@ -54,9 +71,6 @@ final public class Bootstrap {
 //        var isNeedShowGuide = false // 是否需要显示引导页
         let tabVC = TabBarController(1000)
         let navi = BaseNavigationViewController(rootViewController: tabVC)
-        
-//        let loginVC = LoginViewController()
-//        let navi = BaseNavigationViewController(rootViewController: loginVC)
         return navi
     }
     
@@ -89,5 +103,69 @@ final public class Bootstrap {
             completion?()
         })
     }
+    
+    // MARK: - Notification
+    
+    private func setupNotifications() {        
+        // 监听登录成功通知
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleLoginSuccess),
+            name: .loginSuccess,
+            object: nil
+        )
+        
+        // 监听登出成功通知
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleLogout),
+            name: .logoutSuccess,
+            object: nil
+        )
+    }
 }
 
+
+// MARK: - 登录登出
+extension Bootstrap {
+    
+    /// 处理登录成功
+    @objc private func handleLoginSuccess() {
+        
+        DBManager.shared.initDb(userId: UserManager.shared.userId)
+        
+        connectMQTT()
+        
+        DispatchQueue.main.async {
+            self.runMainFlow()
+        }
+        
+        SWRouter.handle(RouteTable.startMonitorMessage)
+        SWRouter.handle(RouteTable.teamStartMonitorMessage)
+    }
+    
+    /// 处理登出
+    @objc private func handleLogout() {
+        
+        disconnectMQTT()
+        
+        SWRouter.handle(RouteTable.stopMonitorMessage)
+        SWRouter.handle(RouteTable.teamStopMonitorMessage)
+        
+        DBManager.shared.closeDb()
+    }
+    
+    /// 为当前用户连接MQTT
+    private func connectMQTT() {
+        debugPrint("[Bootstrap] 用户登录成功，重新连接MQTT")
+        MQTTManager.shared.reconnect()
+    }
+    
+    /// 断开MQTT连接
+    private func disconnectMQTT() {
+        debugPrint("[Bootstrap] 用户登出成功，断开连接MQTT")
+        MQTTManager.shared.disconnect()
+        MQTTManager.shared.removeAllDelegates()
+        MQTTManager.shared.removeAllSubscribes()
+    }
+}

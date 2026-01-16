@@ -535,8 +535,17 @@ class AddPOIViewController: UIViewController {
     }
     
     @objc private func cancelButtonTapped() {
-        deleteCustomMarker?()
-        dismiss(animated: true)
+        guard let name = nameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+              !name.isEmpty else {
+            deleteCustomMarker?()
+            dismiss(animated: true)
+            return
+        }
+        SWAlertView.showAlert(title: nil, message: "确定不保存兴趣点吗？", confirmTitle: "继续编辑" , cancelTitle: "不保存") { [weak self] in
+            guard let self = self else { return }
+            self.deleteCustomMarker?()
+            self.dismiss(animated: true)
+        }
     }
     
     @objc private func addButtonTapped() {

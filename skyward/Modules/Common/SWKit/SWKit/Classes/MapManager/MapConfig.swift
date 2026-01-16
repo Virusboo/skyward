@@ -28,7 +28,8 @@ public class MapConfig {
         "吉林长光影像": "https://api.jl1mall.com/getMap/{z}/{x}/{y}?mk=3ddec00f5f435270285ffc7ad1a60ce5&tk=c4e73a6b0428f65a94fb6fbe677d2375",
         "海图": "https://m12.shipxy.com/tile.c?l=Na&m=o&x={x}&y={y}&z={z}",
         "谷歌地图": "https://gdtc.shipxy.com/tile.g?z={z}&x={x}&y={y}",
-        "谷歌卫星": "https://gwxc.shipxy.com/tile.g?z={z}&x={x}&y={y}"
+        "谷歌卫星": "https://gwxc.shipxy.com/tile.g?z={z}&x={x}&y={y}",
+        "海外地图": "http://mts0.googleapis.com/vt?lyrs=y&x={x}&y={y}&z={z}"
     ]
     
     /// 当前选中的地图源名称

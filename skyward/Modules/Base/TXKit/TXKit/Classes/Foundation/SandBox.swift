@@ -33,6 +33,10 @@ public class SandBox: NSObject {
         return paths.first!
     }
     
+    public static var docmentsURL: URL? {
+        return FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first
+    }
+    
     public static var libPath: String {
         let paths = NSSearchPathForDirectoriesInDomains(FileManager.SearchPathDirectory.libraryDirectory, FileManager.SearchPathDomainMask.userDomainMask, true)
         return paths.first!

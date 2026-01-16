@@ -8,6 +8,7 @@
 import Foundation
 import TXKit
 import TXRouterKit
+import SWKit
 
 public class MessageModule: ModuleType {
     
@@ -16,7 +17,10 @@ public class MessageModule: ModuleType {
     public init() {}
     
     /// 当前模块的路由
-//    public var routeSettings: [any RoutableType.Type] {
-//        return [HomeRouter.self]
-//    }
+    public var routeSettings: [any RoutableType.Type] {
+        return [ConvPageRouter.self,
+                UrgentMessagePageRouter.self,
+                StartMonitorMessageRouter.self,
+                StopMonitorMessageRouter.self]
+    }
 }

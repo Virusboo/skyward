@@ -28,7 +28,7 @@ public class PersonalViewModel: ObservableObject {
     // MARK: - 输入
     public struct Input {
         public let deviceListRequest = PassthroughSubject<BaseModel, Never>()
-        let deviceFirmwareRequest = PassthroughSubject<DeviceFirmwareModel, Never>()
+        public let deviceFirmwareRequest = PassthroughSubject<DeviceFirmwareModel, Never>()
         let emergencyRequest = PassthroughSubject<Void, Never>()
         let getUserInfoRequest = PassthroughSubject<Void, Never>()
     }

@@ -228,10 +228,13 @@ class UrgentMessageViewController: BaseViewController {
         do {
             let rsp = try await NetworkProvider<MessageAPI>().request(.urgentMessages(page: 1, size: 1000))
             let networkResponse = try JSONDecoder().decode(NetworkResponse<UrgentMessageList>.self, from: rsp.data)
-            if let messages = networkResponse.data?.list, !messages.isEmpty {
+            if let messages = networkResponse.data?.list {
                 self.messages = messages.reversed()
-                DBManager.shared.insertToDb(objects: self.messages, intoTable: DBTableName.urgentMessage.rawValue)
-
+                DBManager.shared.deleteFromDb(fromTable: DBTableName.urgentMessage.rawValue)
+                if !messages.isEmpty {
+                    DBManager.shared.insertToDb(objects: self.messages, intoTable: DBTableName.urgentMessage.rawValue)
+                }
+        
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                     self.scrollToBottom(animated: false)

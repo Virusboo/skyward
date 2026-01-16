@@ -13,7 +13,7 @@ import SWTheme
 class TrackRecordViewController: UIViewController {
     var customTransitioningDelegate: CustomTransitioningDelegate?
     
-    var records: [TrackRecord] = []
+    var records: [RouteRecord] = []
     
     var onClickCloseHandler: (() -> (Void))?
     var onClickLookHandler: (([CLLocationCoordinate2D]) -> (Void))?
@@ -86,11 +86,6 @@ class TrackRecordViewController: UIViewController {
             self?.dismiss(animated: true)
             self?.onClickCloseHandler?()
         }, for: .touchUpInside)
-        
-        if let record = records.first(where: {$0.isLook == true}) {
-            let coordinates = recordDataManager.readRecordCoordinates(from: record)
-            onClickLookHandler?(coordinates)
-        }
     }
     
     // MARK: - Setup
@@ -130,90 +125,36 @@ class TrackRecordViewController: UIViewController {
         ])
     }
     
-    func uploadTrackRecord(_ record: TrackRecord) {
-        guard let fileUrl = record.localFileUrl,
-              let data = recordDataManager.getTrackRecordGPXData(from: record),
-              let index = records.firstIndex(where: { $0.name == record.name && $0.localFileUrl == fileUrl }) else {
-            return
-        }
+    func uploadRouteRecord(_ record: RouteRecord) {
         view.sw_showLoading()
-        uploadManager.uploadFile(fileData: data, fileName: record.name, mimeType: "gpx") { progress in
-            print("上传进度： \(progress)")
-        } completion: {[weak self] result in
-            DispatchQueue.main.async {
-                self?.view.sw_hideLoading()
-                switch result {
-                case .success(let response):
-                    if response.isSuccess, let fileUrl = response.data?.fileUrl {
-                        print("上传成功！文件URL: \(fileUrl)")
-                        self?.view.sw_showLoading()
-                        self?.mapService.saveUserTrack(name: record.name, fileUrl: fileUrl) { result in
-                            DispatchQueue.main.async {
-                                self?.view.sw_hideLoading()
-                                switch result {
-                                case .success(let response):
-                                    if response.statusCode == 200 {
-                                        self?.records[index].uploadStatus = .uploaded
-                                        self?.tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
-                                        if let record = self?.records[index] {
-                                            self?.recordDataManager.updateUploadStatusRecord(record)
-                                        }
-                                    }
-                                    
-                                case .failure(let error):
-                                    debugPrint("保存失败：\(error.localizedDescription)")
-                                }
-                            }
-                        }
-                    } else {
-                        print("上传失败: \(response.msg ?? "未知错误")")
-                    }
-                case .failure(let error):
-                    print("上传错误: \(error.localizedDescription)")
+        recordDataManager.saveRouteToService(record) { [weak self] success, errorMsg in
+            self?.view.sw_hideLoading()
+            if success {
+                
+            } else {
+                if let msg = errorMsg {
+                    self?.view.sw_showWarningToast(msg)
                 }
             }
         }
     }
     
-    func lookTrackRecord(_ record: TrackRecord) {
-        guard let index = records.firstIndex(where: { $0.name == record.name && $0.id == record.id}) else {
-            return
-        }
-        
-        let isLook = record.isLook
-        let willLook = !isLook
-        
-        if willLook {
-            // 先把所有记录isLook置为false
-            for (i, trackRecord) in records.enumerated() {
-                if trackRecord.isLook {
-                    records[i].isLook = false
-                    recordDataManager.updateLookStatusRecord(records[i])
-                }
-            }
-            
-            records[index].isLook = true
-            recordDataManager.updateLookStatusRecord(records[index])
-            tableView.reloadData()
-            
-            let coordinates = recordDataManager.readRecordCoordinates(from: record)
-            onClickLookHandler?(coordinates)
-        } else {
-            records[index].isLook = false
-            recordDataManager.updateLookStatusRecord(records[index])
-            tableView.reloadRows(at: [IndexPath(row: index, section: 0)], with: .none)
-            onClickUnLookHandler?()
-        }
+    func lookRouteRecord(_ record: RouteRecord) {
+
     }
     
-    func deleteTrackRecord(_ record: TrackRecord) {
+    func deleteRouteRecord(_ record: RouteRecord) {
         SWAlertView.showAlert(title: nil, message: "确定删除轨迹吗？") {
-            if self.recordDataManager.deleteRecord(record) {
-                self.onClickDeleteHandler?(true)
-                self.records.removeAll(where: { $0.id == record.id })
-                self.tableView.reloadData()
-                self.emptyView.isHidden = self.records.count > 0
-            }
+            self.recordDataManager.deleteRouteFromService(routeId: record.id, completion: { [weak self] success, errorMsg in
+                self?.onClickDeleteHandler?(true)
+                self?.records.removeAll(where: { $0.id == record.id })
+                self?.tableView.reloadData()
+                if let count = self?.records.count, count > 0 {
+                    self?.emptyView.isHidden = false
+                } else {
+                    self?.emptyView.isHidden = true
+                }
+            })
         }
     }
 }
@@ -230,14 +171,14 @@ extension TrackRecordViewController: UITableViewDelegate, UITableViewDataSource 
         let record = records[indexPath.row]
         cell.configure(with: record)
         cell.onClickUploadHandler = {[weak self] in
-            self?.uploadTrackRecord(record)
+            self?.uploadRouteRecord(record)
         }
         cell.onClickLookHandler = {[weak self] in
-            self?.lookTrackRecord(record)
+//            self?.lookRouteRecord(record)
         }
         
         cell.onClickDeleteHandler = {[weak self] in
-            self?.deleteTrackRecord(record)
+            self?.deleteRouteRecord(record)
         }
         return cell
     }

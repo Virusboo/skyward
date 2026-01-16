@@ -11,7 +11,6 @@ import Foundation
 import Moya
 import Combine
 
-
 public class NetworkProvider<T: TargetType> {
     
     private let provider: MoyaProvider<T>
@@ -25,13 +24,19 @@ public class NetworkProvider<T: TargetType> {
     ) {
         self.config = config
         
+        // 查找token刷新插件
+        var updatedPlugins = plugins
+        if !plugins.contains(where: { $0 is NetworkAuthPlugin }) {
+            updatedPlugins.append(TokenManager.shared.getAccessTokenPlugin())
+        }
+        
         // 创建自定义endpoint closure
         let endpointClosure = { (target: T) -> Endpoint in
             let defaultEndpoint = MoyaProvider.defaultEndpointMapping(for: target)
             
             // 添加公共headers
-            var headers = target.headers ?? [:]
-            config.commonHeaders.forEach { headers[$0.key] = $0.value }
+            let headers = target.headers ?? [:]
+//            config.commonHeaders.forEach { headers[$0.key] = $0.value }
             
             // 处理参数：只有当任务类型支持参数时才添加公共参数
             var finalTask = target.task
@@ -67,7 +72,7 @@ public class NetworkProvider<T: TargetType> {
             requestClosure: requestClosure,
             stubClosure: stubClosure,
             callbackQueue: callbackQueue,
-            plugins: plugins,
+            plugins: updatedPlugins,
             trackInflights: false
         )
     }
@@ -76,7 +81,7 @@ public class NetworkProvider<T: TargetType> {
     @available(iOS 13.0, *)
     public func request(_ target: T) async throws -> Response {
         return try await withCheckedThrowingContinuation { continuation in
-            provider.request(target) { result in
+            self.requestWithTokenRefresh(target) { result in
                 switch result {
                 case .success(let response):
                     continuation.resume(returning: response)
@@ -91,7 +96,7 @@ public class NetworkProvider<T: TargetType> {
     @available(iOS 13.0, *)
     public func request(_ target: T) -> AnyPublisher<Response, MoyaError> {
         return Future<Response, MoyaError> { promise in
-            self.provider.request(target) { result in
+            self.requestWithTokenRefresh(target) { result in
                 switch result {
                 case .success(let response):
                     promise(.success(response))
@@ -108,7 +113,167 @@ public class NetworkProvider<T: TargetType> {
                        callbackQueue: DispatchQueue? = .main,
                        progress: ProgressBlock? = nil,
                        completion: @escaping (Result<Response, MoyaError>) -> Void) {
-        provider.request(target, callbackQueue: callbackQueue, progress: progress, completion: completion)
+        requestWithTokenRefresh(target, callbackQueue: callbackQueue, progress: progress, completion: completion)
+    }
+    
+    ///带Token刷新的请求方法（核心实现）
+    private func requestWithTokenRefresh(_ target: T,
+                                        callbackQueue: DispatchQueue? = .main,
+                                        progress: ProgressBlock? = nil,
+                                        completion: @escaping (Result<Response, MoyaError>) -> Void) {
+        // 直接请求，如果是401错误会被插件捕获处理
+        provider.request(target, callbackQueue: callbackQueue, progress: progress) { [weak self] result in
+            
+            // 检查是否需要处理token刷新
+            if case .failure(let error) = result,
+               case .underlying(let nsError as NSError, _) = error,
+               nsError.code == 401, nsError.domain == "com.skyward.auth" {
+                
+                // 触发token刷新
+                TokenManager.shared.requestRefreshAccessToken { [weak self] _ in
+                    // token刷新成功后重试请求
+                    self?.provider.request(target, callbackQueue: callbackQueue, progress: progress, completion: completion)
+                }
+                
+            } else {
+                // 不是401错误，直接返回原结果
+                completion(result)
+            }
+        }
+    }
+    
+    /// 发送请求（退避请求）
+    public func retryRequest(_ target: T,
+                        callbackQueue: DispatchQueue? = .main,
+                        progress: ProgressBlock? = nil,
+                        completion: @escaping (Result<Response, MoyaError>) -> Void) {
+        requestWithTokenRefresh(target,
+                                callbackQueue: callbackQueue,
+                                progress: progress,
+                                maxRetryCount: 3,
+                                currentRetry: 0,
+                                completion: completion)
+    }
+    
+    /// 带Token刷新的请求方法（核心实现）增加退避重试机制
+    private func requestWithTokenRefresh(_ target: T,
+                                         callbackQueue: DispatchQueue? = .main,
+                                         progress: ProgressBlock? = nil,
+                                         maxRetryCount: Int = 3,
+                                         currentRetry: Int = 0,
+                                         completion: @escaping (Result<Response, MoyaError>) -> Void) {
+        
+        provider.request(target, callbackQueue: callbackQueue, progress: progress) { [weak self] result in
+            
+            // 检查是否需要处理token刷新
+            if case .failure(let error) = result,
+               case .underlying(let nsError as NSError, _) = error,
+               nsError.code == 401, nsError.domain == "com.skyward.auth" {
+                
+                // 如果已经超过最大重试次数，直接返回错误
+                guard currentRetry < maxRetryCount else {
+                    completion(result)
+                    return
+                }
+                
+                // 触发token刷新
+                TokenManager.shared.requestRefreshAccessToken { refreshResult in
+                    switch refreshResult {
+                    case .success:
+                        // token刷新成功后，使用指数退避延迟重试
+                        let delay = self?.calculateExponentialBackoffDelay(retryCount: currentRetry) ?? 0
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
+                            self?.requestWithTokenRefresh(target,
+                                                          callbackQueue: callbackQueue,
+                                                          progress: progress,
+                                                          maxRetryCount: maxRetryCount,
+                                                          currentRetry: currentRetry + 1,
+                                                          completion: completion)
+                        }
+                        
+                    case .failure:
+                        // token刷新失败，直接返回原错误
+                        completion(result)
+                    }
+                }
+                
+            } else {
+                // 不是401错误，直接返回原结果
+                completion(result)
+            }
+        }
+    }
+    
+    /// 计算指数退避延迟时间
+    private func calculateExponentialBackoffDelay(retryCount: Int,
+                                                  baseDelay: TimeInterval = 1.0,
+                                                  maxDelay: TimeInterval = 30.0,
+                                                  jitter: Bool = true) -> TimeInterval {
+        
+        // 指数退避公式: baseDelay * (2^retryCount)
+        let exponent = pow(2, Double(retryCount))
+        var delay = baseDelay * exponent
+        
+        // 添加随机抖动以避免惊群效应
+        if jitter {
+            let jitterFactor = Double.random(in: 0.5...1.5)
+            delay *= jitterFactor
+        }
+        
+        // 限制最大延迟时间
+        return min(delay, maxDelay)
+    }
+    
+    // MARK: - 高级重试方法
+    
+    /// 带重试机制的请求（公开方法）
+    public func requestWithRetry(_ target: T,
+                                 maxRetries: Int = 3,
+                                 callbackQueue: DispatchQueue? = .main,
+                                 progress: ProgressBlock? = nil,
+                                 completion: @escaping (Result<Response, MoyaError>) -> Void) {
+        
+        requestWithTokenRefresh(target,
+                                callbackQueue: callbackQueue,
+                                progress: progress,
+                                maxRetryCount: maxRetries,
+                                currentRetry: 0,
+                                completion: completion)
+    }
+    
+    /// 仅重试指定错误类型
+    public func requestWithSelectiveRetry(_ target: T,
+                                          retryableErrors: [Int] = [401, 408, 500, 502, 503, 504],
+                                          maxRetries: Int = 3,
+                                          callbackQueue: DispatchQueue? = .main,
+                                          progress: ProgressBlock? = nil,
+                                          completion: @escaping (Result<Response, MoyaError>) -> Void) {
+        
+        var currentRetry = 0
+        
+        func attemptRequest() {
+            provider.request(target, callbackQueue: callbackQueue, progress: progress) { [weak self] result in
+                guard let self = self else { return }
+                
+                if case .failure(let error) = result,
+                   case .statusCode(let response) = error,
+                   retryableErrors.contains(response.statusCode),
+                   currentRetry < maxRetries {
+                    
+                    currentRetry += 1
+                    let delay = self.calculateExponentialBackoffDelay(retryCount: currentRetry - 1)
+                    
+                    DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                        attemptRequest()
+                    }
+                } else {
+                    completion(result)
+                }
+            }
+        }
+        
+        attemptRequest()
     }
 }
 

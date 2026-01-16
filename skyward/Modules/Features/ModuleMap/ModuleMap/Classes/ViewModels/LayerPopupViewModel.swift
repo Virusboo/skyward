@@ -61,7 +61,11 @@ public class LayerPopupConfig {
                       isSelected: true),
             MapSource(name: "海图",
                       imageName: "map4",
-                      sceneUrl: "https://m12.shipxy.com/tile.c?l=Na&m=o&x={x}&y={y}&z={z}")
+                      sceneUrl: "https://m12.shipxy.com/tile.c?l=Na&m=o&x={x}&y={y}&z={z}"),
+            MapSource(name: "海外地图",
+                      imageName: "map5",
+                      sceneUrl: "http://mts0.googleapis.com/vt?lyrs=y&x={x}&y={y}&z={z}"),
+            
         ]
         
         self.annotationOptions = [

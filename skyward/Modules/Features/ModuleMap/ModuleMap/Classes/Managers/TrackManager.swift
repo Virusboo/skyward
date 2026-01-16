@@ -16,25 +16,27 @@ public class TrackManager: NSObject {
     
     // MARK: - Properties
     var recording: Bool = false
-    let locationManager = CLLocationManager()
-    var currentRecord: TrackRecord?
-    
+    private let locationManager = CLLocationManager()
+    private let dataManager = TrackDataManager()
+    private var lastLocation: CLLocation?
     // 定位更新的回调
     var locationUpdateCompletion: ((CLLocationCoordinate2D?, Error?) -> Void)?
-    
-    // data
-    private var _dataManager: TrackDataManager?
-    var dataManager: TrackDataManager {
-        if _dataManager == nil {
-            _dataManager = TrackDataManager()
-        }
-        return _dataManager!
-    }
     
     // MARK: - Initializer
     override init() {
         super.init()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appDidTermination),
+            name: UIApplication.willTerminateNotification,
+            object: nil
+        )
+        
         setupLocationManager()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
     
     // MARK: - Setup
@@ -77,14 +79,7 @@ public class TrackManager: NSObject {
         }
         recording = true
         
-        // 创建新的轨迹记录
-        guard let record = dataManager.createNewRecord() else {
-            recording = false
-            return
-        }
-        
-        currentRecord = record
-        
+        dataManager.startRecord()
         // 启动持续定位更新（使用startUpdatingLocation而非requestLocation）
         // 系统会根据distanceFilter和desiredAccuracy自动推送位置更新
         // 系统会自动保持定位服务在后台运行，无需额外的后台保活机制
@@ -94,14 +89,13 @@ public class TrackManager: NSObject {
     
     func stopRecord() {
         recording = false
-        
         // 停止定位更新
         locationManager.stopUpdatingLocation()
     }
     
     func finishRecord() {
-        _dataManager = nil
-        currentRecord = nil
+        dataManager.stopRecord()
+        lastLocation = nil
     }
     
     // MARK: - Location Processing
@@ -111,12 +105,9 @@ public class TrackManager: NSObject {
         guard validateLocation(location) else {
             return
         }
-        guard let trackFileURL = currentRecord?.fileFullURL() else {
-            return
-        }
         // 创建定位点
         let point = RecordPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, altitude: location.altitude, timestamp: location.timestamp)
-        if dataManager.writeRecordPoint(point, to: trackFileURL) {
+        if dataManager.writePointToTxtFile(point) {
             locationUpdateCompletion?(location.coordinate, nil)
         }
     }
@@ -139,25 +130,12 @@ public class TrackManager: NSObject {
             return false
         }
         
-        guard let currentRecord = currentRecord else {
-            return false
-        }
-        
-        let recordCoordinates = dataManager.readRecordCoordinates(from: currentRecord)
-        if recordCoordinates.count == 0 {
-            return true
-        }
-        // 读取文件中最后一个点
-        guard let lastLatitude = recordCoordinates.last?.latitude, let lastLongitude = recordCoordinates.last?.longitude else {
-            // 如果文件中没有点，则新点合法
+        // 没有上一个点，说明是第一个点
+        guard let lastLocation = lastLocation else {
             return true
         }
         
         // 检查1: 与上一个点的距离是否小于3米
-        let lastLocation = CLLocation(
-            latitude: lastLatitude,
-            longitude: lastLongitude
-        )
         let distance = newLocation.distance(from: lastLocation)
         if distance < 3 {
             debugPrint("新点与上一个点距离小于3米(\(distance)米)，已跳过记录")
@@ -165,8 +143,8 @@ public class TrackManager: NSObject {
         }
         
         // 检查2: 是否与上一个点完全相同
-        if abs(lastLatitude - newLocation.coordinate.latitude) < 0.000001 &&
-            abs(lastLongitude - newLocation.coordinate.longitude) < 0.000001 {
+        if abs(lastLocation.coordinate.latitude - newLocation.coordinate.latitude) < 0.000001 &&
+            abs(lastLocation.coordinate.longitude - newLocation.coordinate.longitude) < 0.000001 {
             debugPrint("检测到完全相同的轨迹点，已跳过记录")
             return false
         }
@@ -177,46 +155,43 @@ public class TrackManager: NSObject {
     
     // MARK: - 增删改查
     
-    func saveRecords(recordName: String) {
-        guard let record = currentRecord else {
+    func saveRoute(name: String) {
+        guard let sessionRecordId = dataManager.sessionRecordId else {
             return
         }
         
-        if recordName != record.name {
-            // 创建更新后的record对象
-            var updatedRecord = record
-            updatedRecord.name = recordName
-            
-            // 修改本地文件夹名称和数据库记录
-            dataManager.renameRecord(updatedRecord)
-        }
+        let record = RouteRecord(id: sessionRecordId, routeName: name)
+        dataManager.saveRouteToLocal(record)
+
         finishRecord()
     }
     
-    func deleteRecords() {
-        if let record = currentRecord {
-            dataManager.deleteRecord(record)
+    func getTrackRecords() -> [RouteRecord] {
+        let result = dataManager.getRouteRecords(type: .track)
+        
+        guard let sessionRecordId = dataManager.sessionRecordId else {
+            return result
         }
-        finishRecord()
+        
+        return result.filter({$0.id != sessionRecordId})
     }
     
-    func getTrackRecords() -> [TrackRecord] {
-        let result = dataManager.getTrackRecords()
-        if let currentRecord = currentRecord {
-            return result.filter({$0.id != currentRecord.id})
+    func getSessionTrackName() -> String {
+        return DateFormatter.fullPretty.string(from: Date())
+    }
+    
+    //MARK: - Notification
+    
+    @objc func appDidTermination() {
+        if recording {
+            saveRoute(name: getSessionTrackName())
         }
-        return result
     }
 
     //MARK: - Test
     func testSavePoints() {
-        guard let record = dataManager.createNewRecord(), let fileURL = record.fileFullURL()  else {
-            return
-        }
-        currentRecord = record
-        
         // 批量写入轨迹点
-        dataManager.writeRecordPoints(sampleRecords(), to: fileURL)
+        dataManager.writeRecordPoints(sampleRecords())
     }
     
     func sampleRecords() -> [RecordPoint] {

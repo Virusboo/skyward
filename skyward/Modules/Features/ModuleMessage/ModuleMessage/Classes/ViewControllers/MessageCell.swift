@@ -8,6 +8,7 @@
 import TXKit
 import SWKit
 import SWTheme
+import SDWebImage
 
 class MessageCell: BaseCell {
     
@@ -55,11 +56,20 @@ class MessageCell: BaseCell {
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        selectionStyle = .none
         setupUI()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        avatarImageView.image = nil
+        nameLabel.text = nil
+        messageLabel.text = nil
+        timeLabel.text = nil
     }
     
     private func setupUI() {
@@ -72,27 +82,91 @@ class MessageCell: BaseCell {
         contentView.addSubview(timeLabel)
     }
     
-    func configure(with message: Message) {
+//    func configure(with message: Message) {
+//        messageLabel.text = message.content
+//        nameLabel.text = message.sender?.name
+//        
+//        if let avatarUrl = message.sender?.avatarUrl {
+//            avatarImageView.image = MessageModule.image(named: avatarUrl)
+//        } else {
+//            avatarImageView.image = MessageModule.image(named: "avatar_default")
+//        }
+//        
+//        if let timestamp = message.timestamp {
+//            let formatter = DateFormatter()
+//            formatter.dateFormat = "HH:mm"
+//            timeLabel.text = formatter.string(from: timestamp)
+//        } else {
+//            timeLabel.text = ""
+//        }
+//        
+//        if "current_user" == message.sender?.id {
+//            layoutSent()
+//        } else {
+//            layoutReceived()
+//        }
+//    }
+    
+    /**
+     enum NoticeType: Int, Codable {
+         case all = -1        // 所有
+         case sos = 1         // SOS紧急求助
+         case safety = 2      // 报平安
+         case weather = 3     // 天气通知
+         case service = 4     // 紧急联系人
+     */
+//    func configure(with message: NoticeItem) {
+//        messageLabel.text = message.noticeContent
+//        nameLabel.text = message.noticeType == 4 ? "紧急联系人" : "天行探索平台"
+//        
+//        if message.noticeType == 1 {
+//            avatarImageView.image = MessageModule.image(named: "avatar_sos")
+//        } else if message.noticeType == 2 {
+//            avatarImageView.image = MessageModule.image(named: "avatar_safety")
+//        } else if message.noticeType == 3 {
+//            avatarImageView.image = MessageModule.image(named: "avatar_weather")
+//        } else {
+//            avatarImageView.image = MessageModule.image(named: "avatar_default")
+//        }
+//        
+//        if let timestamp = message.noticeTime {
+//            let date = Date(timeIntervalSinceReferenceDate: TimeInterval(timestamp))
+//            let formatter = DateFormatter()
+//            formatter.dateFormat = "HH:mm"
+//            timeLabel.text = formatter.string(from: date)
+//        } else {
+//            timeLabel.text = ""
+//        }
+//        
+//        if message.noticeType == 4 {
+//            layoutSent()
+//        } else {
+//            layoutReceived()
+//        }
+//    }
+    
+    func configure(with message: UrgentMessage) {
+        prepareForReuse()
         messageLabel.text = message.content
-        nameLabel.text = message.sender?.name
-        
-        if let avatarUrl = message.sender?.avatarUrl {
-            avatarImageView.image = MessageModule.image(named: avatarUrl)
-        } else {
-            avatarImageView.image = MessageModule.image(named: "avatar_default")
-        }
-        
-        if let timestamp = message.timestamp {
-            let formatter = DateFormatter()
-            formatter.dateFormat = "HH:mm"
-            timeLabel.text = formatter.string(from: timestamp)
-        } else {
-            timeLabel.text = ""
-        }
-        
-        if "current_user" == message.sender?.id {
+        timeLabel.text = message.sendTime ?? ""
+        let isSelf = message.sendId == UserManager.shared.userId
+        if isSelf {
+            avatarImageView.sd_setImage(with: URL(string: UserManager.shared.userInfo?.avatar ?? ""), placeholderImage: MessageModule.image(named: "avatar_default"))
+            nameLabel.text = UserManager.shared.userInfo?.nickname
             layoutSent()
         } else {
+            if message.sendUserBaseInfoVO?.imUserType == 9 {
+                avatarImageView.image = MessageModule.image(named: "avatar_txts")
+            } else {
+                avatarImageView.sd_setImage(with: URL(string: message.sendUserBaseInfoVO?.avatar ?? ""), placeholderImage: MessageModule.image(named: "avatar_default"))
+            }
+            
+            if let nickname = message.sendUserBaseInfoVO?.nickname ?? message.sendUserBaseInfoVO?.phone  {
+                nameLabel.text = nickname
+            } else {
+                nameLabel.text = ""
+            }
+            
             layoutReceived()
         }
     }

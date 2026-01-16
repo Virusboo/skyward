@@ -89,4 +89,8 @@ public enum BorderWidth: CGFloat {
 public extension Notification.Name {
     static let loginSuccess = Notification.Name(rawValue: "noti.loginSuccess")
     static let logoutSuccess = Notification.Name(rawValue: "noti.logoutSuccess")
+    
+    static let switchSceneMapSuccess = Notification.Name(rawValue: "noti.switchSceneMapSuccess")
+    /// 收到团队新消息
+    static let receiveTeamNewMessage = Notification.Name(rawValue: "noti.receiveTeamNewMessage")
 }

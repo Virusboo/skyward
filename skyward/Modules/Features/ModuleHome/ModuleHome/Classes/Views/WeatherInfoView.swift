@@ -44,7 +44,7 @@ class WeatherInfoView: UIView {
     // MARK: - 私有方法
     
     private func setupViews() {
-        backgroundColor = UIColor.black.withAlphaComponent(0.2)
+        backgroundColor = UIColor.black.withAlphaComponent(0.5)
         layer.cornerRadius = 6
         
         addSubview(weatherIconImageView)
@@ -70,7 +70,7 @@ class WeatherInfoView: UIView {
     /// 设置天气图标
     /// - Parameter image: 天气图标
     func setWeatherIcon(_ image: UIImage?) {
-        weatherIconImageView.image = image
+        weatherIconImageView.image = image?.withTintColor(.white)
     }
     
     /// 设置天气信息文本

@@ -509,7 +509,7 @@ public extension UIView {
         var messageRect = CGRect.zero
         
         if let messageLabel = messageLabel {
-            messageRect.origin.x = imageRect.origin.x + imageRect.size.width + style.horizontalPadding
+            messageRect.origin.x = imageRect.origin.x + imageRect.size.width + 8.0
             messageRect.origin.y = titleRect.origin.y + titleRect.size.height + style.verticalPadding
             messageRect.size.width = messageLabel.bounds.size.width
             messageRect.size.height = messageLabel.bounds.size.height
@@ -520,9 +520,13 @@ public extension UIView {
         let wrapperWidth = max((imageRect.size.width + (style.horizontalPadding * 2.0)), (longerX + longerWidth + style.horizontalPadding))
         
         let textMaxY = messageRect.size.height <= 0.0 && titleRect.size.height > 0.0 ? titleRect.maxY : messageRect.maxY
-        let wrapperHeight = max((textMaxY + style.verticalPadding), (imageRect.size.height + (style.verticalPadding * 2.0)))
+        let wrapperHeight = max((textMaxY + style.verticalPadding), (messageRect.size.height + (style.verticalPadding * 2.0)))
         
         wrapperView.frame = CGRect(x: 0.0, y: 0.0, width: wrapperWidth, height: wrapperHeight)
+        //根据wrapperView.frame，修正一下imageView 保持垂直居中
+        imageRect.origin.y = (CGRectGetHeight(wrapperView.frame) - CGRectGetHeight(imageRect)) * 0.5
+        imageView?.frame = imageRect
+        
         
         if let titleLabel = titleLabel {
             titleRect.size.width = longerWidth
@@ -602,7 +606,7 @@ public struct ToastStyle {
      Default is 10.0.
      
     */
-    public var horizontalPadding: CGFloat = 10.0
+    public var horizontalPadding: CGFloat = 16.0
     
     /**
      The spacing from the vertical edge of the toast view to the content. When a title
@@ -610,12 +614,12 @@ public struct ToastStyle {
      Default is 10.0. On iOS11+, this value is added added to the `safeAreaInset.top`
      and `safeAreaInsets.bottom`.
     */
-    public var verticalPadding: CGFloat = 10.0
+    public var verticalPadding: CGFloat = 8.0
     
     /**
      The corner radius. Default is 10.0.
     */
-    public var cornerRadius: CGFloat = 10.0;
+    public var cornerRadius: CGFloat = 8.0;
     
     /**
      The title font. Default is `.boldSystemFont(16.0)`.
@@ -680,7 +684,7 @@ public struct ToastStyle {
     /**
      The image size. The default is 80 x 80.
     */
-    public var imageSize = CGSize(width: 80.0, height: 80.0)
+    public var imageSize = CGSize(width: 16.0, height: 16.0)
     
     /**
      The size of the toast activity view when `makeToastActivity(position:)` is called.
@@ -756,7 +760,7 @@ public class ToastManager {
      Default is `ToastPosition.Bottom`.
      
      */
-    public var position: ToastPosition = .bottom
+    public var position: ToastPosition = .center
     
 }
 

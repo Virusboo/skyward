@@ -239,34 +239,62 @@ public class NetworkRetryPlugin: PluginType {
 // MARK: - 网络认证插件
 public class NetworkAuthPlugin: PluginType {
     
-    private let tokenProvider: () -> String?
-    private let tokenUpdater: (String) -> Void
+    // 定义请求处理闭包类型
+    public typealias TokenClosure = () -> String?
     
+    // 核心属性
+    private let tokenClosure: TokenClosure
+    
+    /// 初始化简化版认证插件
+    /// - Parameter tokenClosure: 获取当前token的闭包
     public init(
-        tokenProvider: @escaping () -> String?,
-        tokenUpdater: @escaping (String) -> Void
+        tokenClosure: @escaping TokenClosure
     ) {
-        self.tokenProvider = tokenProvider
-        self.tokenUpdater = tokenUpdater
+        self.tokenClosure = tokenClosure
     }
     
+    /// 准备请求，添加Authorization头
     public func prepare(_ request: URLRequest, target: TargetType) -> URLRequest {
-        var modifiedRequest = request
+        guard let authorizable = target as? AccessTokenAuthorizable,
+            let authorizationType = authorizable.authorizationType
+            else { return request }
         
-        // 添加认证token
-        if let token = tokenProvider() {
-            modifiedRequest.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
-        }
-        
-        return modifiedRequest
+        guard let token = tokenClosure() else { return request }
+
+        var request = request
+        let authValue = authorizationType.value + " " + token
+        request.addValue(authValue, forHTTPHeaderField: "Authorization")
+
+        return request
     }
     
+    /// 处理请求错误，实现token刷新和请求重试
     public func didReceive(_ result: Result<Response, MoyaError>, target: TargetType) {
         // 检查是否需要刷新token
         if case .success(let response) = result, response.statusCode == 401 {
             print("🔒 Token过期，需要刷新")
             // TODO: 实现token刷新逻辑
         }
+    }
+    
+    
+    /// 处理请求结果，检测401状态
+    public func process(_ result: Result<Response, MoyaError>, target: TargetType) -> Result<Response, MoyaError> {
+        // 检查是否需要刷新token（状态码为401）
+        if case .failure(let error) = result,
+           case .statusCode(let response) = error,
+           response.statusCode == 401 {
+            
+            print("🔒 Token过期，需要刷新")
+            // 返回特殊的401错误，供上层处理token刷新
+            return .failure(MoyaError.underlying(NSError(
+                domain: "com.skyward.auth",
+                code: 401,
+                userInfo: [NSLocalizedDescriptionKey: "Token过期，需要刷新"]
+            ), nil))
+        }
+        
+        return result
     }
 }
 
@@ -351,26 +379,21 @@ public struct NetworkDefaultPlugins {
     
     /// 创建默认的Moya插件（推荐）
     public static func createDefaultMoyaPlugins(
-        logLevel: NetworkLoggerPlugin.LogLevel = .info,
+        logLevel: NetworkLoggerPlugin.LogLevel = .debug,
         cachePolicy: NetworkCachePlugin.CachePolicy = .memoryOnly,
         maxRetryCount: Int = 3,
-        tokenProvider: @escaping () -> String? = { nil },
-        tokenUpdater: @escaping (String) -> Void = { _ in },
         metricsHandler: @escaping (NetworkMonitorPlugin.NetworkMetrics) -> Void = { _ in }
     ) -> [PluginType] {
         var plugins: [PluginType] = []
         
-        // 添加日志插件（适配为Moya PluginType）
-        let loggerAdapter = NetworkLoggerPlugin(logLevel: logLevel)
-        plugins.append(loggerAdapter)
+        // 添加日志插件
+        plugins.append(NetworkLoggerPlugin(logLevel: logLevel))
         
-        // 添加缓存插件（适配为Moya PluginType）
-        let cacheAdapter = NetworkCachePlugin(cachePolicy: cachePolicy)
-        plugins.append(cacheAdapter)
+        // 添加缓存插件
+        plugins.append(NetworkCachePlugin(cachePolicy: cachePolicy))
         
-        // 添加认证插件（适配为Moya PluginType）
-        let authAdapter = NetworkAuthPlugin(tokenProvider: tokenProvider, tokenUpdater: tokenUpdater)
-        plugins.append(authAdapter)
+        // 添加监控插件
+        plugins.append(NetworkMonitorPlugin(metricsHandler: metricsHandler))
         
         return plugins
     }

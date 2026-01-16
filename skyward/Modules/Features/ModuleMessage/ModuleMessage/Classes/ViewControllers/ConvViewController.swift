@@ -8,30 +8,34 @@
 import TXKit
 import SnapKit
 import SWTheme
+import SWKit
 
 class ConvViewController: BaseViewController {
     var tableView: UITableView!
     
-    private var messages: [Message] = []
+//    private var messages: [Message] = []
+    private var messages: [NoticeItem] = []
     
     private let inputContainerView = UIView()
     private let messageInputTextView = UITextView()
     private let sendButton = UIButton(type: .system)
     
-    // 当前用户
-    private let currentUser = User(id: "current_user", name: "赵波", avatarUrl: "avatar_sos", isCurrentUser: true)
+    private var userId: String = UserManager.shared.userId
+    private var homeCache: SWCache?
     
-    // 对方用户
-    private let otherUser = User(id: "other_user", name: "李芳敏", avatarUrl: "avatar_service", isCurrentUser: false)
+    var latestMessage: NewMessageModel?
+    
+    var noticeReponse: NoticeModel = NoticeModel(totalCount: 0, safeCount: 0, sosCount: 0, weatherCount: 0, safeList: [], sosList: [], weatherList: [])
     
     // MARK: - Override
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        title = otherUser.name
+//        title = otherUser.name
         view.backgroundColor = ThemeManager.current.backgroundColor
         setupTableView()
-        loadSampleData()
+        setupCaches()
+        loadCacheData()
     }
     
     private func setupTableView() {
@@ -101,24 +105,6 @@ class ConvViewController: BaseViewController {
         }
     }
     
-    private func loadSampleData() {        
-        messages = [
-            Message(id: "1", content: "你好，最近怎么样？", sender: otherUser, timestamp: Date().addingTimeInterval(-3600)),
-            Message(id: "2", content: "挺不错的，你呢？", sender: currentUser, timestamp: Date().addingTimeInterval(-3590)),
-            Message(id: "3", content: "我也挺好的，工作有点忙", sender: otherUser, timestamp: Date().addingTimeInterval(120)),
-            Message(id: "4", content: "要注意休息啊", sender: currentUser, timestamp: Date().addingTimeInterval(180)),
-            Message(id: "5", content: "谢谢关心，我会的。你最近在做什么项目？", sender: otherUser, timestamp: Date().addingTimeInterval(240))
-        ]
-        
-        messages = [
-            Message(id: "1", content: "[SOS紧急求助] 上报成功，已成功上报给紧急联系人188888888", sender: otherUser, timestamp: Date().addingTimeInterval(-3600)),
-            Message(id: "2", content: "[安全上报] 上报成功，已成功上报给紧急联系人188888888", sender: currentUser, timestamp: Date().addingTimeInterval(-3590)),
-            Message(id: "3", content: "我这边联系人去支援你我在阿拉善一个沙丘附近，车坏了不能行驶。需要水源、交通工具等紧急物资", sender: otherUser, timestamp: Date().addingTimeInterval(120)),
-            Message(id: "4", content: "天气预警：阿拉善气象台2025年08月27日发布暴雨黄色预警，气温29℃，东北风6级，能见度5km，未来2小时内有短时强降水，山体", sender: currentUser, timestamp: Date().addingTimeInterval(180)),
-            Message(id: "5", content: "谢谢关心，我会的。你最近在做什么项目？", sender: otherUser, timestamp: Date().addingTimeInterval(240))
-        ]
-    }
-    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
@@ -147,9 +133,9 @@ class ConvViewController: BaseViewController {
             guard !content.isEmpty, content != "请输入消息..." else { return }
             
             // 创建新消息
-            let newMessage = Message(id: "6", content: content, sender: currentUser, timestamp: Date())
+//            let newMessage = Message(id: "6", content: content, sender: currentUser, timestamp: Date())
         
-            messages.append(newMessage)
+//            messages.append(newMessage)
             tableView.reloadData()
             tableView.scrollToRow(at: IndexPath(row: messages.count - 1, section: 0), at: .bottom, animated: true)
             
@@ -169,7 +155,7 @@ extension ConvViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(for: indexPath, cellType: MessageCell.self)
-        cell.configure(with: messages[indexPath.row])
+//        cell.configure(with: messages[indexPath.row])
         return cell
     }
 }
@@ -179,7 +165,7 @@ extension ConvViewController: UITextViewDelegate {
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.text == "请输入消息..." {
             textView.text = ""
-            textView.textColor = .label
+            textView.textColor = .black
         }
     }
     
@@ -206,5 +192,176 @@ extension ConvViewController: UITextViewDelegate {
             return false
         }
         return true
+    }
+}
+
+
+extension ConvViewController {
+    
+    // MARK: - Cache
+    
+    private func setupCaches() {
+        do {
+            homeCache = try SWCache(dirName: CacheModuleName.home.module)
+        } catch {
+            print("❌ SWCache 创建失败: \(error)")
+            print("错误详情: \(error.localizedDescription)")
+        }
+    }
+    
+    @MainActor private func loadCacheData() {
+        // 加载最新消息缓存
+        loadCacheValue(forKey: getLatestMessageSubscribeTopic()) { [weak self] (data: Data?) in
+            guard let self = self, let data = data else { return }
+            self.latestMessage = try? JSONDecoder().decode(NewMessageModel.self, from: data)
+            self.updateNoticeList()
+        }
+        
+        // 加载通知列表缓存
+        loadCacheValue(forKey: getNoticeListSubscribeTopic()) { [weak self] (data: Data?) in
+            guard let self = self, let data = data else { return }
+            if let reponse = try? JSONDecoder().decode(NoticeModel.self, from: data) {
+                self.noticeReponse = reponse
+            }
+            self.updateNoticeList()
+        }
+    }
+    
+    private func loadCacheValue(forKey key: String,completion: @escaping (Data?) -> Void) {
+        guard let cache = homeCache else {
+            completion(nil)
+            return
+        }
+        
+        cache.value(forKey: key) { result in
+            switch result {
+            case .success(let cacheResult):
+                switch cacheResult {
+                case .memory(let data), .disk(let data):
+                    completion(data)
+                case .none:
+                    print("没有缓存数据 for key: \(key)")
+                    completion(nil)
+                }
+            case .failure(let error):
+                print("❌ 加载缓存失败 for key: \(key): \(error)")
+                completion(nil)
+            }
+        }
+    }
+    
+    private func updateNoticeList() {
+
+        // 根据选中类型获取对应的通知列表
+        var filteredNotices = noticeReponse.allNotices
+        
+        // 处理最新消息，声明为可选类型
+        var latestNotice: NoticeItem?
+        if let latestMessage = latestMessage {
+            latestNotice = NoticeItem(noticeId: nil,
+                                         noticeType: 4,
+                                         noticeContent: latestMessage.message,
+                                         reportId: latestMessage.sendId,
+                                         noticeTime: latestMessage.sendTime)
+        }
+        
+        
+        
+        // 按noticeTime降序排序
+        filteredNotices.sort { item1, item2 in
+            guard let time1 = item1.noticeTime else { return false }  // 没有时间的排在后面
+            guard let time2 = item2.noticeTime else { return true }   // 有时间的排在前面
+            return time1 < time2  // 降序排序（时间大的排前面）
+        }
+        
+        if let latestNotice = latestNotice {
+            filteredNotices.append(latestNotice)
+        }
+        
+        messages = filteredNotices
+        
+        // 在主线程更新UI
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            
+            DispatchQueue.mp_asyncAfter(0.1) {
+                let count = self.tableView(self.tableView, numberOfRowsInSection: 0)
+                guard count > 0 else {
+                    return
+                }
+                self.tableView.scrollToRow(at: IndexPath(row: count - 1, section: 0), at: .bottom, animated: false)
+            }
+        }
+    }
+    
+    // MARK: - Helper Methods
+    private func getNoticeListSubscribeTopic() -> String {
+        return "txts/home/servertoapp/notice/list/" + userId
+    }
+
+    private func getLatestMessageSubscribeTopic() -> String {
+        return "txts/home/servertoapp/urgentMessage/latest/" + userId
+    }
+}
+
+
+struct NoticeItem: Codable {
+    public let noticeId: String?
+    public let noticeType: Int
+    public let noticeContent: String?
+    public let reportId: String?
+    public let noticeTime: Int64?
+    
+    public init(
+        noticeId: String?,
+        noticeType: Int,
+        noticeContent: String?,
+        reportId: String?,
+        noticeTime: Int64?
+    ) {
+        self.noticeId = noticeId
+        self.noticeType = noticeType
+        self.noticeContent = noticeContent
+        self.reportId = reportId
+        self.noticeTime = noticeTime
+    }
+}
+
+struct NewMessageModel: Codable {
+    public let message: String?
+    public let sendTime: Int64?
+    public let sendId: String?
+}
+
+ struct NoticeModel: Codable {
+    public let totalCount: Int
+    public let safeCount: Int
+    public let sosCount: Int
+    public let weatherCount: Int
+    public let safeList: [NoticeItem]
+    public let sosList: [NoticeItem]
+    public let weatherList: [NoticeItem]
+    
+    public init(
+        totalCount: Int,
+        safeCount: Int,
+        sosCount: Int,
+        weatherCount: Int,
+        safeList: [NoticeItem],
+        sosList: [NoticeItem],
+        weatherList: [NoticeItem]
+    ) {
+        self.totalCount = totalCount
+        self.safeCount = safeCount
+        self.sosCount = sosCount
+        self.weatherCount = weatherCount
+        self.safeList = safeList
+        self.sosList = sosList
+        self.weatherList = weatherList
+    }
+    
+    // 获取所有通知列表
+    public var allNotices: [NoticeItem] {
+        return sosList + safeList + weatherList
     }
 }

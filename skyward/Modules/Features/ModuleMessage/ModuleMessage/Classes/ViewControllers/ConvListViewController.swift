@@ -95,6 +95,14 @@ class ConvListViewController: BaseViewController, UITableViewDataSource, UITable
         tableView.dataSource = self
         
         searchField.delegate = self
+        
+        sosTopCardView.onActionCallback = {
+            ReportManager.report(.sos)
+        }
+        
+        safetyTopCardView.onActionCallback = {
+            ReportManager.report(.safety)
+        }
     }
     
     
@@ -162,10 +170,9 @@ class ConvListViewController: BaseViewController, UITableViewDataSource, UITable
     }
     
     public func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        // 处理消息点击事件
-        print("点击了第\(indexPath.row)条消息")
-        
-        navigationController?.pushViewController(ConvViewController(), animated: true)
+        let conv = conversationArray[indexPath.row]
+        let vc = ConvViewController()
+        vc.title = conv.title
+        navigationController?.pushViewController(vc, animated: true)
     }
 }

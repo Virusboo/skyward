@@ -73,12 +73,12 @@ public extension NetworkAPI {
 /// 网络响应模型
 public struct NetworkResponse<T: Codable>: Codable {
     public let code: String?
-    public let message: String?
+    public let msg: String?
     public let data: T?
     
     public init(code: String, message: String? = nil, data: T? = nil) {
         self.code = code
-        self.message = message
+        self.msg = message
         self.data = data
     }
     

@@ -54,10 +54,13 @@ public class MapViewController: UIViewController {
     private var isAddPOIing = false
     private var isAddRoute  = false {
         didSet {
-            routeBottomView.isHidden = !isAddRoute
-            if isAddRoute == false {
+            if isAddRoute {
+                routeBottomView.isHidden = false
+                routeManager.startRecord()
+            } else {
+                routeBottomView.isHidden = true
+                routeManager.stopRecord()
                 distanceManager.clear()
-                routeManager.closeRecord()
             }
         }
     }
@@ -148,7 +151,6 @@ public class MapViewController: UIViewController {
             self?.presentAddRouteVC()
         }, for: .touchUpInside)
         view.exitButton.addAction(UIAction {[weak self] _ in
-            self?.routeManager.cancelRecord()
             self?.isAddRoute = false
         }, for: .touchUpInside)
         
@@ -214,8 +216,11 @@ extension MapViewController {
                 let pointId = String(markerId.dropFirst(7))
                 self?.getUserPointData(pointId: pointId)
             }else if markerId.contains("campsite") || markerId.contains("scenicSpots") || markerId.contains("gasStation") {
-                let coordinate = CLLocationCoordinate2D(latitude: data.coordinate.latitude, longitude: data.coordinate.longitude)
-                self?.showWeatherDetail(with: data.title, address: data.subtitle ?? "", coordinate: coordinate)
+                if let result = markerId.components(separatedBy: "_").last {
+                    self?.showWeatherDetail(with: result)
+                }
+            } else if layerId == "myRoutesLine" {
+                self?.presentRouteDetail(data: data)
             }
         }
         mapManager.onMapSingleTapHandler = {[weak self] coordinate in
@@ -683,10 +688,11 @@ extension MapViewController {
                     if recording {
                         self?.trackManager.stopRecord()
                         var popupContainer: SWPopupView?
-                        let customView = AddTrackPopupView(trackName: self?.trackManager.currentRecord?.name)
+                        let customView = AddTrackPopupView(trackName: self?.trackManager.getSessionTrackName())
                         customView.closeHandler = {
                             self?.distanceManager.clear()
-                            self?.trackManager.deleteRecords()
+                            self?.trackManager.stopRecord() // 实际点x或取消就调用
+                            self?.trackManager.finishRecord()
                             popupContainer?.dismiss()
                         }
                         customView.confirmHandler = { recordName in
@@ -696,7 +702,7 @@ extension MapViewController {
                                 } else {
                                     customView.endEditing(true)
                                     self?.distanceManager.clear()
-                                    self?.trackManager.saveRecords(recordName: recordName!)
+                                    self?.trackManager.saveRoute(name: recordName!)
                                     popupContainer?.dismiss()
                                 }
                             }
@@ -1060,6 +1066,31 @@ extension MapViewController {
                                                     configuration: SWPopupConfiguration(dismissOnMaskTap: false))
     }
     
+    private func presentRouteDetail(data: MarkerData) {
+        var popupContainer: SWPopupView?
+        let customView = LookRoutePopupView(routeName: data.title, desc: data.subtitle)
+        customView.closeHandler = {
+            popupContainer?.dismiss()
+        }
+        customView.deleteHandler = {
+            popupContainer?.dismiss()
+            guard let routeId = Int64(data.id) else {
+                return
+            }
+            self.view.sw_showLoading()
+            self.routeManager.deleteRoute(routeId) { success in
+                self.view.sw_showLoading()
+                if success {
+                    guard let markerLayerManager = self.mapManager.markerLayerManager else {
+                        return
+                    }
+                    markerLayerManager.removeMarker("\(routeId)", from: "myRoutesLine")
+                }
+            }
+        }
+        popupContainer = SWPopupView.showFromBottom(contentView: customView)
+    }
+    
     private func prsentTrackRecordVC() {
         let trackRecordVC = TrackRecordViewController()
         trackRecordVC.records = trackManager.getTrackRecords()
@@ -1100,16 +1131,22 @@ extension MapViewController {
 extension MapViewController {
     
     // 当用户点击兴趣点时显示天气详情
-    func showWeatherDetail(with title: String, address: String, coordinate: CLLocationCoordinate2D) {
-        let weatherVC = POIWeatherDetailViewController(title: title, address: address, coordinate: coordinate)
-        if let sheet = weatherVC.sheetPresentationController {
-            sheet.detents = [.medium(), .large()]
-            sheet.prefersGrabberVisible = true
-            sheet.prefersEdgeAttachedInCompactHeight = true
-            sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
-            sheet.delegate = weatherVC
+    func showWeatherDetail(with poiId: String) {
+        POIDatabaseManager.shared.fetchPOI(by: poiId) { [weak self] poi in
+            if let poi = poi {
+                print("公共兴趣点数据-----\(poi)")
+                let weatherVC = POIWeatherDetailViewController(poiData: poi)
+                if let sheet = weatherVC.sheetPresentationController {
+                    sheet.detents = [.medium(), .large()]
+                    sheet.prefersGrabberVisible = true
+                    sheet.prefersEdgeAttachedInCompactHeight = true
+                    sheet.widthFollowsPreferredContentSizeWhenEdgeAttached = true
+                    sheet.delegate = weatherVC
+                }
+                self?.present(weatherVC, animated: true)
+            }
         }
-        present(weatherVC, animated: true)
+        
     }
     
     func showUserPointDetail(with poiData: UserPOIData) {
@@ -1202,19 +1239,12 @@ extension MapViewController {
                 markerLayerManager.setLayerVisible(custom, layerId: "custom")
                 markerLayerManager.setLayerVisible(custom, layerId: "newCustom")
             }
-            if let route = poiLayers["我的路线"] {
-                if route {
-                    if let routes = self.routeManager.getAllRoutes() {
-                        for route in routes {
-                            if let routeId = route.routeId, let points = self.routeManager.getPointsInRoute(routeId: routeId), points.count > 1 {
-                                let coordinates = points.map { CLLocationCoordinate2D(latitude: $0.latitude ?? 0, longitude: $0.longitude ?? 0) }
-                                self.distanceManager.showRoute(coordinates: coordinates)
-                            }
-                        }
-                    }
-                } else {
-                    self.distanceManager.clear()
+            if let myRoutes = poiLayers["我的路线"] {
+                if myRoutes {
+                    addRoutesMarkers()
                 }
+                markerLayerManager.setLayerVisible(myRoutes, layerId: "myRoutesLine")
+                markerLayerManager.setLayerVisible(myRoutes, layerId: "myRoutesNode")
             }
         }
     }
@@ -1229,6 +1259,8 @@ extension MapViewController {
         _ = markerLayerManager.createLayer(id: "gasStation", name: "加油站", isVisible: false)
         _ = markerLayerManager.createLayer(id: "custom", name: "自定义标注", isVisible: false)
         _ = markerLayerManager.createLayer(id: "newCustom", name: "添加自定义标注", isVisible: true)
+        _ = markerLayerManager.createLayer(id: "myRoutesLine", name: "我的路线", isVisible: true)
+        _ = markerLayerManager.createLayer(id: "myRoutesNode", name: "我的路线节点", isVisible: true)
     }
     
     /// 添加公共兴趣点
@@ -1238,20 +1270,20 @@ extension MapViewController {
         // 添加露营地
         let campsitesData = markersData.filter { $0.type?.contains("露营地") == true }
 //        print("露营地消息------\(campsitesData)")
-        addMarkerWirtStyle(poiData: campsitesData, styleStr: "campsite", styleType: .campsite)
+        addMarkerWirtStyle(poiData: campsitesData, styleStr: "campsite")
         
         // 添加风景名胜
         let scenicSpotsData = markersData.filter { $0.type?.contains("风景名胜") == true }
 //        print("风景名胜消息------\(scenicSpotsData)")
-        addMarkerWirtStyle(poiData: scenicSpotsData, styleStr: "scenicSpots", styleType: .scenicSpots)
+        addMarkerWirtStyle(poiData: scenicSpotsData, styleStr: "scenicSpots")
         
         // 添加加油站
         let gasStationData = markersData.filter { $0.type?.contains("加油站") == true }
-        addMarkerWirtStyle(poiData: gasStationData, styleStr: "gasStation", styleType: .gasStation)
+        addMarkerWirtStyle(poiData: gasStationData, styleStr: "gasStation")
         
     }
     
-    public func addMarkerWirtStyle(poiData: [PublicPOIData], styleStr: String, styleType: PresetStyleType) {
+    public func addMarkerWirtStyle(poiData: [PublicPOIData], styleStr: String) {
         guard let markerLayerManager = mapManager.markerLayerManager else {
             print("标记层管理器未初始化")
             return
@@ -1265,8 +1297,7 @@ extension MapViewController {
                     title: publicPoi.name ?? "",
                     subtitle: publicPoi.address ?? ""
                 )
-                
-                markerLayerManager.addMarkerWithPresetStyle(to: styleStr, data: data, styleType: styleType)
+                markerLayerManager.addMarker(to: styleStr, data: data)
             }
         }
     }
@@ -1288,7 +1319,7 @@ extension MapViewController {
                     title: userPoi.name ?? "",
                     subtitle: userPoi.description ?? ""
                 )
-                markerLayerManager.addMarkerWithPresetStyle(to: "custom", data: data, styleType: .user)
+                markerLayerManager.addMarker(to: "custom", data: data)
             }
         }
     }
@@ -1308,7 +1339,7 @@ extension MapViewController {
                 title: pointData.name ?? "",
                 subtitle: pointData.address ?? ""
             )
-            markerLayerManager.addMarkerWithPresetStyle(to: "newCustom", data: data, styleType: .user)
+            markerLayerManager.addMarker(to: "newCustom", data: data)
         }
         
         let x = max(customPoint.x - 120, 0)
@@ -1332,7 +1363,22 @@ extension MapViewController {
         self.view.addSubview(customPointView)
     }
     
-    
+    func addRoutesMarkers() {
+        guard let markerLayerManager = mapManager.markerLayerManager else {
+            return
+        }
+        
+        for route in self.routeManager.getAllRoutes() ?? [] {
+            let routeId = route.id
+            if let points = self.routeManager.getPointsInRoute(routeId: routeId), points.count > 1 {
+                let coordinates = points.map { CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude) }
+                markerLayerManager.addLineMarker(to: "myRoutesLine", id: String(routeId), coordinates: coordinates, title: route.routeName ?? "", subTitle: route.description ?? "")
+                coordinates.forEach { coordinate in
+                    markerLayerManager.addPointMarker(to: "myRoutesNode", id: String(coordinate.longitude), coordinate: coordinate)
+                }
+            }
+        }
+    }
 
     // 关闭点位视图，并且删除点位
     private func closeCustomPointView(with pointData: MapSearchPointMsgData) {

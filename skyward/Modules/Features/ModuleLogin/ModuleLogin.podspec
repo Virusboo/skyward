@@ -6,24 +6,27 @@ Pod::Spec.new do |s|
   LoginModule provides a complete login and registration flow with customizable UI and routing support.
                        DESC
 
-  s.homepage         = 'http://localhost'
+  s.homepage         = 'http://localhost/ModuleLogin'
   s.license          = { :type => 'MIT', :file => 'LICENSE' }
   s.author           = { 'Your Name' => 'your.email@example.com' }
   s.source           = { :git => 'http://localhost/LoginModule.git', :tag => s.version.to_s }
 
-  s.ios.deployment_target = '11.0'
+  s.ios.deployment_target = '13.0'
   s.swift_version = '5.0'
 
-  s.source_files = 'Sources/Classes/**/*.{swift}'
+  s.source_files = 'ModuleLogin/Classes/**/*'
+  
   s.resource_bundles = {
-    'ModuleLogin' => ['Sources/Resources/**/*']
+    'ModuleLogin' => ['ModuleLogin/Assets/*.xcassets']
   }
 
   # 添加 SnapKit 依赖
   s.dependency 'SnapKit'
-  
   s.dependency 'TXKit'
+  s.dependency 'TXRouterKit'
+  s.dependency 'SWKit'
+  s.dependency 'SWTheme'
+  s.dependency 'SWNetwork'
   
-  # 如果也使用了 Router
-  # s.dependency 'Router', :path => '../Router'
+  
 end

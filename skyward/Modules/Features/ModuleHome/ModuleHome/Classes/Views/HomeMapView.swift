@@ -9,32 +9,16 @@ import UIKit
 import SWKit
 import SWTheme
 import SnapKit
+import TangramMap
 
 protocol MapViewDelegate: AnyObject {
     func mapViewDidTapLocationButton(_ mapView: HomeMapView)
     func mapViewDidTapZoomButton(_ mapView: HomeMapView)
-    func mapViewDidTapLayerButton(_ mapView: HomeMapView)
 }
 
 class HomeMapView: UIView {
+    
     weak var delegate: MapViewDelegate?
-    
-    private let mapView: UIView = {
-        let imageView = UIView()
-        imageView.backgroundColor = ThemeManager.current.mainColor
-        imageView.clipsToBounds = true
-        imageView.layer.cornerRadius = 12
-        imageView.translatesAutoresizingMaskIntoConstraints = false
-        return imageView
-    }()
-    
-    private let locationDot: UIView = {
-        let dot = UIView()
-        dot.backgroundColor = .green
-        dot.layer.cornerRadius = 10
-        dot.translatesAutoresizingMaskIntoConstraints = false
-        return dot
-    }()
     
     private let mapControlStack: UIStackView = {
         let stack = UIStackView()
@@ -45,10 +29,13 @@ class HomeMapView: UIView {
     }()
     
     // 天气信息视图
-    private let weatherInfoView = WeatherInfoView()
+    public let weatherInfoView = WeatherInfoView()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        self.backgroundColor = .systemGray6
+        self.clipsToBounds = true
+        self.layer.cornerRadius = CornerRadius.large.rawValue
         setupViews()
         setupConstraints()
     }
@@ -56,6 +43,12 @@ class HomeMapView: UIView {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+    }
+    
     
     private func setupViews() {
         // 添加地图控制按钮
@@ -67,30 +60,15 @@ class HomeMapView: UIView {
         zoomButton.tag = 1
         zoomButton.addTarget(self, action: #selector(mapControlButtonTapped(_:)), for: .touchUpInside)
         
-        let layerButton = createIconButton(systemName: "home_map_layer_icon")
-        layerButton.tag = 2
-        layerButton.addTarget(self, action: #selector(mapControlButtonTapped(_:)), for: .touchUpInside)
-        
         mapControlStack.addArrangedSubview(locationButton)
         mapControlStack.addArrangedSubview(zoomButton)
-        mapControlStack.addArrangedSubview(layerButton)
         
         // 添加子视图
-        addSubview(mapView)
-        mapView.addSubview(mapControlStack)
-        mapView.addSubview(locationDot)
-        mapView.addSubview(weatherInfoView)
+        addSubview(mapControlStack)
+        addSubview(weatherInfoView)
     }
     
     private func setupConstraints() {
-        mapView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
-        
-        locationDot.snp.makeConstraints { make in
-            make.center.equalTo(mapView)
-            make.size.equalTo(20)
-        }
         
         mapControlStack.snp.makeConstraints { make in
             make.bottom.trailing.equalToSuperview().inset(8)
@@ -100,7 +78,7 @@ class HomeMapView: UIView {
         // 天气信息视图约束 - 左上角
         weatherInfoView.snp.makeConstraints { make in
             make.top.leading.equalToSuperview().inset(12)
-            make.height.equalTo(32)
+            make.height.equalTo(26)
         }
     }
     
@@ -125,8 +103,6 @@ class HomeMapView: UIView {
             delegate?.mapViewDidTapLocationButton(self)
         case 1:
             delegate?.mapViewDidTapZoomButton(self)
-        case 2:
-            delegate?.mapViewDidTapLayerButton(self)
         default:
             break
         }

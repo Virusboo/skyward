@@ -217,7 +217,7 @@ extension PersonalViewController: UITableViewDataSource, UITableViewDelegate {
             break
         case 1:
             // 我的卫星装备
-            let deviceVC = DeviceListViewController()
+            let deviceVC = DeviceListViewController(selectedDeviceType: 0)
             navigationController?.pushViewController(deviceVC, animated: true)
             break
 //        case 2:

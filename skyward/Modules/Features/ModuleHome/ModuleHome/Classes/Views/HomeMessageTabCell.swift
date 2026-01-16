@@ -45,7 +45,8 @@ class HomeMessageTabCell: UICollectionViewCell {
         ])
     }
     
-    func configure(with title: String) {
-        titleLabel.text = title
+    func configure(with item: NoticeTypeItem) {
+        titleLabel.text = item.desc
+        setSelected(item.selected)
     }
 }

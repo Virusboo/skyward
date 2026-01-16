@@ -15,14 +15,14 @@ public enum NetworkEnvironment {
     case test
     case production
     
-    var baseURL: URL {
+    public var baseURL: URL {
         switch self {
         case .development:
             return URL(string: "http://test.bjtxts.com:9999")!
         case .test:
-            return URL(string: "https://api-test.example.com")!
+            return URL(string: "http://api-test.example.com")!
         case .production:
-            return URL(string: "https://api.example.com")!
+            return URL(string: "https://api.bjtxts.com")!
         }
     }
 }

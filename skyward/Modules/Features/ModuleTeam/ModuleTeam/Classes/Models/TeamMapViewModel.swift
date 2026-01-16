@@ -112,7 +112,7 @@ public class TeamMapViewModel: ObservableObject {
     }
     
     func locationDetailDesc(data: MarkerData) -> (String, String, String) {
-        let coordinate = CLLocationCoordinate2D(latitude: data.coordinate.latitude, longitude: data.coordinate.longitude)
+        guard let coordinate = data.coordinate else { return ("", "", "") }
         let longitudeString = convertToDMSString(coordinate.longitude, isLongitude: true)
         let latitudeString = convertToDMSString(coordinate.latitude, isLongitude: false)
         let coordinateDes = longitudeString + "," + latitudeString

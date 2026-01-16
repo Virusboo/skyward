@@ -269,6 +269,12 @@ public struct DeviceFirmwareModel {
     let versionCode: String
     let hardwareModel: String
     
+    public init(deviceType: Int, versionCode: String, hardwareModel: String) {
+        self.deviceType = deviceType
+        self.versionCode = versionCode
+        self.hardwareModel = hardwareModel
+    }
+    
     func toDictionary() -> [String: Any] {
         return [
             "deviceType": deviceType,

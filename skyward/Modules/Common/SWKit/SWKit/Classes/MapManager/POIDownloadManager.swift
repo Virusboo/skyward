@@ -88,13 +88,7 @@ public class POIDownloadManager {
             completion?(false)
             return
         }
-        
-//        guard !NetworkMonitor.shared.isConnected else {
-//            print("网络不可用，无法下载")
-//            completion?(false)
-//            return
-//        }
-        
+
         guard retryCount < Config.maxRetryCount else {
             print("达到最大重试次数")
             completion?(false)

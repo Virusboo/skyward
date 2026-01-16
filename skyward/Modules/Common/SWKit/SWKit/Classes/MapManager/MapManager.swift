@@ -436,7 +436,7 @@ public class MapManager: NSObject {
     
     /// 添加自定义标注
     public func addCustomMarker(layerId: String, coordinate: CLLocationCoordinate2D, title: String,
-                        subtitle: String? = nil, style: MarkerStyle = .defaultStyle) -> String? {
+                                subtitle: String? = nil, style: MarkerStyle = PointMarkerStyle.default) -> String? {
         guard let markerLayerManager = markerLayerManager else {
             print("标记层管理器未初始化")
             return nil
@@ -445,7 +445,7 @@ public class MapManager: NSObject {
         let markerId = UUID().uuidString
         let data = MarkerData(id: markerId, coordinate: coordinate, title: title, subtitle: subtitle)
         
-        return markerLayerManager.addMarker(to: layerId, data: data, style: style)
+        return markerLayerManager.addMarker(to: layerId, data: data)
     }
     
     public func createPointLocationMarker(with coordinate: CLLocationCoordinate2D) {
@@ -633,7 +633,7 @@ extension MapManager: TGRecognizerDelegate {
                 coordinate: coordinate,
                 title: "轨迹点",
                 subtitle: "手动添加的轨迹点",
-                style: MarkerStyle(
+                style: PointMarkerStyle(
                     color: "orange",
                     size: [12, 12]
                 )

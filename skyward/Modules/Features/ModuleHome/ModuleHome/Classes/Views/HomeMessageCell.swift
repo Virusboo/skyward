@@ -30,6 +30,7 @@ class HomeMessageCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         backgroundColor = .clear
+        selectionStyle = .none
         contentView.addSubview(iconImageView)
         contentView.addSubview(contentLabel)
         setupConstraints()
@@ -56,13 +57,13 @@ class HomeMessageCell: UITableViewCell {
         }
     }
     
-    func configure(with message: HomeMessage?) {
-        if let icon = message?.type.icon {
+    func configure(with message: HomeNoticeItem) {
+        if let icon = message.noticeType.icon {
             iconImageView.image = HomeModule.image(named: icon)
         } else {
             iconImageView.image = nil
         }
-        if let content = message?.content {
+        if let content = message.noticeContent {
             contentLabel.text = content
         } else {
             contentLabel.text = nil

@@ -79,7 +79,7 @@ public extension Response {
                 
                 // 检查业务状态码
                 guard networkResponse.isSuccess else {
-                    throw NetworkError.serverError(statusCode: Int(networkResponse.code ?? "0") ?? 0, message: networkResponse.message)
+                    throw NetworkError.serverError(statusCode: Int(networkResponse.code ?? "0") ?? 0, message: networkResponse.msg)
                 }
                 
                 // 检查数据是否存在

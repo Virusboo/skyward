@@ -106,11 +106,11 @@ class TrackRecordCell: BaseCell {
         }
     }
     
-    func configure(with record: TrackRecord) {
-        nameLabel.text = record.name
-        uploadLabel.isHidden = record.uploadStatus == .uploaded
-        uploadButton.isHidden = record.uploadStatus == .uploaded
-        lookButton.isSelected = record.isLook
+    func configure(with record: RouteRecord) {
+        nameLabel.text = record.routeName
+//        uploadLabel.isHidden = record.uploadStatus == .uploaded
+//        uploadButton.isHidden = record.uploadStatus == .uploaded
+//        lookButton.isSelected = record.isLook
         
     }
     
