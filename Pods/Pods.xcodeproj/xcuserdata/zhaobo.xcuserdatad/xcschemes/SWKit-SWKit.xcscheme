@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6A335368E48D8F41037E80B18E8D1D45"
-               BuildableName = "SWKitBundle.bundle"
-               BlueprintName = "SWKit-SWKitBundle"
+               BlueprintIdentifier = "80E95B43E367578C9D480AB21E12BF95"
+               BuildableName = "SWKit.bundle"
+               BlueprintName = "SWKit-SWKit"
                ReferencedContainer = "container:Pods.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>

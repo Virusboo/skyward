@@ -19,20 +19,19 @@
     "ios": "10.0"
   },
   "source_files": "SWKit/Classes/**/*",
+  "resource_bundles": {
+    "SWKit": [
+      "SWKit/Assets/*.xcassets"
+    ]
+  },
+  "vendored_frameworks": "SWKit/Frameworks/*",
   "dependencies": {
     "TXKit": [],
     "TXCacheKit": [],
     "SWTheme": [],
-    "Moya": []
-  },
-  "subspecs": [
-    {
-      "name": "Assets",
-      "resource_bundles": {
-        "SWKitBundle": [
-          "SWKit/Assets/*.xcassets"
-        ]
-      }
-    }
-  ]
+    "SWNetwork": [],
+    "Moya": [],
+    "SnapKit": [],
+    "WCDB.swift": []
+  }
 }

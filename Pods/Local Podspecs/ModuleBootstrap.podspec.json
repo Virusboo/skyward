@@ -19,11 +19,19 @@
     "ios": "13.0"
   },
   "source_files": "ModuleBootstrap/Classes/**/*",
+  "resource_bundles": {
+    "ModuleBootstrap": [
+      "ModuleBootstrap/Assets/*.xcassets"
+    ]
+  },
   "dependencies": {
     "SWKit": [],
     "SWTheme": [],
+    "SWNetwork": [],
     "ModuleHome": [],
     "ModuleLogin": [],
-    "ModuleMessage": []
+    "ModuleMessage": [],
+    "ModulePersonal": [],
+    "ModuleMap": []
   }
 }

@@ -25,6 +25,11 @@
 			<key>orderHint</key>
 			<integer>2</integer>
 		</dict>
+		<key>ModuleBootstrap-ModuleBootstrap.xcscheme</key>
+		<dict>
+			<key>isShown</key>
+			<false/>
+		</dict>
 		<key>ModuleBootstrap.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -151,10 +156,13 @@
 			<key>orderHint</key>
 			<integer>21</integer>
 		</dict>
-		<key>SWKit-SWKitBundle.xcscheme</key>
+		<key>SWKit-SWKit.xcscheme</key>
 		<dict>
 			<key>isShown</key>
 			<false/>
+		</dict>
+		<key>SWKit-SWKitBundle.xcscheme</key>
+		<dict>
 			<key>orderHint</key>
 			<integer>26</integer>
 		</dict>

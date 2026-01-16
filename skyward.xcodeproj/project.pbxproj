@@ -12,7 +12,6 @@
 		B4886CDB2EFB950F0013C412 /* UserAgreement.html in Resources */ = {isa = PBXBuildFile; fileRef = B4886CD92EFB950F0013C412 /* UserAgreement.html */; };
 		B4A323782EE18AF400A5EEEF /* DroidSansFallback.ttf in Resources */ = {isa = PBXBuildFile; fileRef = B4A323772EE18AF400A5EEEF /* DroidSansFallback.ttf */; };
 		B4B702822EE82DB5006C618B /* scene3d.yaml in Resources */ = {isa = PBXBuildFile; fileRef = B4B702812EE82DB5006C618B /* scene3d.yaml */; };
-		B4BEB8E82F0F5E220056BEB1 /* dahaidao.mbtiles in Resources */ = {isa = PBXBuildFile; fileRef = B4BEB8E72F0F5E220056BEB1 /* dahaidao.mbtiles */; };
 		B4D3CBE72ED3EAD7006D0305 /* scanning.json in Resources */ = {isa = PBXBuildFile; fileRef = B4D3CBE62ED3EAD7006D0305 /* scanning.json */; };
 		B4F6F9AD2EEAEB150057FD79 /* Pods_skyward.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 889022F314AC7D1EDC63439F /* Pods_skyward.framework */; };
 		F26143632EC30FFB0018F242 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F26143622EC30FFB0018F242 /* PrivacyInfo.xcprivacy */; };
@@ -30,7 +29,6 @@
 		B4886CD92EFB950F0013C412 /* UserAgreement.html */ = {isa = PBXFileReference; lastKnownFileType = text.html; path = UserAgreement.html; sourceTree = "<group>"; };
 		B4A323772EE18AF400A5EEEF /* DroidSansFallback.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = DroidSansFallback.ttf; sourceTree = "<group>"; };
 		B4B702812EE82DB5006C618B /* scene3d.yaml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = scene3d.yaml; sourceTree = "<group>"; };
-		B4BEB8E72F0F5E220056BEB1 /* dahaidao.mbtiles */ = {isa = PBXFileReference; lastKnownFileType = file; path = dahaidao.mbtiles; sourceTree = "<group>"; };
 		B4D3CBE62ED3EAD7006D0305 /* scanning.json */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = scanning.json; sourceTree = "<group>"; };
 		F261434C2EC303EA0018F242 /* skyward.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = skyward.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F26143622EC30FFB0018F242 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
@@ -96,7 +94,6 @@
 				F26143AD2EC31A020018F242 /* AppDelegate.swift */,
 				B4D3CBE62ED3EAD7006D0305 /* scanning.json */,
 				B4A323772EE18AF400A5EEEF /* DroidSansFallback.ttf */,
-				B4BEB8E72F0F5E220056BEB1 /* dahaidao.mbtiles */,
 				B4B702812EE82DB5006C618B /* scene3d.yaml */,
 				B4886CCC2EFA95D60013C412 /* Citys.plist */,
 				B4886CD82EFB950F0013C412 /* PrivacyPolicy.html */,
@@ -172,7 +169,6 @@
 				F26144902EC6BBEE0018F242 /* Launch Screen.storyboard in Resources */,
 				B4886CCD2EFA95D60013C412 /* Citys.plist in Resources */,
 				B4A323782EE18AF400A5EEEF /* DroidSansFallback.ttf in Resources */,
-				B4BEB8E82F0F5E220056BEB1 /* dahaidao.mbtiles in Resources */,
 				F26143B32EC31A020018F242 /* Assets.xcassets in Resources */,
 				B4D3CBE72ED3EAD7006D0305 /* scanning.json in Resources */,
 				B4B702822EE82DB5006C618B /* scene3d.yaml in Resources */,

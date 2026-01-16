@@ -11,6 +11,7 @@ ${BUILT_PRODUCTS_DIR}/ModuleTeam/ModuleTeam.framework
 ${BUILT_PRODUCTS_DIR}/Moya/Moya.framework
 ${BUILT_PRODUCTS_DIR}/MqttCocoaAsyncSocket/MqttCocoaAsyncSocket.framework
 ${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework
+${PODS_ROOT}/../skyward/Modules/Common/SWKit/SWKit/Frameworks/TangramMap.framework
 ${BUILT_PRODUCTS_DIR}/SWKit/SWKit.framework
 ${BUILT_PRODUCTS_DIR}/SWNetwork/SWNetwork.framework
 ${BUILT_PRODUCTS_DIR}/SWTheme/SWTheme.framework

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "summary": "A lightweight login module for iOS apps",
   "description": "LoginModule provides a complete login and registration flow with customizable UI and routing support.",
-  "homepage": "http://localhost",
+  "homepage": "http://localhost/ModuleLogin",
   "license": {
     "type": "MIT",
     "file": "LICENSE"
@@ -16,18 +16,22 @@
     "tag": "1.0.0"
   },
   "platforms": {
-    "ios": "11.0"
+    "ios": "13.0"
   },
   "swift_versions": "5.0",
-  "source_files": "Sources/Classes/**/*.{swift}",
+  "source_files": "ModuleLogin/Classes/**/*",
   "resource_bundles": {
     "ModuleLogin": [
-      "Sources/Resources/**/*"
+      "ModuleLogin/Assets/*.xcassets"
     ]
   },
   "dependencies": {
     "SnapKit": [],
-    "TXKit": []
+    "TXKit": [],
+    "TXRouterKit": [],
+    "SWKit": [],
+    "SWTheme": [],
+    "SWNetwork": []
   },
   "swift_version": "5.0"
 }
