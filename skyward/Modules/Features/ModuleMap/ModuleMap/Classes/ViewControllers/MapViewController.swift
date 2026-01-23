@@ -59,7 +59,7 @@ public class MapViewController: UIViewController {
                 routeManager.startRecord()
             } else {
                 routeBottomView.isHidden = true
-                routeManager.stopRecord()
+                routeManager.endRecord()
                 distanceManager.clear()
             }
         }
@@ -687,28 +687,7 @@ extension MapViewController {
                 action: { [weak self] in
                     if recording {
                         self?.trackManager.stopRecord()
-                        var popupContainer: SWPopupView?
-                        let customView = AddTrackPopupView(trackName: self?.trackManager.getSessionTrackName())
-                        customView.closeHandler = {
-                            self?.distanceManager.clear()
-                            self?.trackManager.stopRecord() // 实际点x或取消就调用
-                            self?.trackManager.finishRecord()
-                            popupContainer?.dismiss()
-                        }
-                        customView.confirmHandler = { recordName in
-                            self?.viewModel.checkValidTrackName(recordName) {[weak self] errorMsg in
-                                if let errorMsg = errorMsg {
-                                    UIWindow.topWindow?.sw_showWarningToast(errorMsg)
-                                } else {
-                                    customView.endEditing(true)
-                                    self?.distanceManager.clear()
-                                    self?.trackManager.saveRoute(name: recordName!)
-                                    popupContainer?.dismiss()
-                                }
-                            }
-                        }
-                        popupContainer = SWPopupView.showFromBottom(contentView: customView,
-                                                                    configuration: SWPopupConfiguration(dismissOnMaskTap: false))
+                        self?.presentAddTrackVC()
                     } else {
                         self?.trackManager.startRecord()
                         self?.trackManager.locationUpdateCompletion = { [weak self] coordinate, error in
@@ -716,7 +695,6 @@ extension MapViewController {
                                 self?.distanceManager.trackLine(coordinate: coordinate)
                             }
                         }
-                        
                     }
                     self?.hidePopupView()
                 }
@@ -1058,12 +1036,41 @@ extension MapViewController {
             popupContainer?.dismiss()
         }
         customView.confirmHandler = {[weak self] name, desc in
-            self?.routeManager.saveRoute(name: name, desc: desc)
-            self?.isAddRoute = false
+            self?.routeManager.saveRoute(name: name, desc: desc) { [weak self] in
+                self?.isAddRoute = false
+            }
             popupContainer?.dismiss()
         }
         popupContainer = SWPopupView.showFromBottom(contentView: customView,
                                                     configuration: SWPopupConfiguration(dismissOnMaskTap: false))
+    }
+    
+    private func presentAddTrackVC() {
+        trackManager.getSessionRouteDefaultName { [weak self] name in
+            var popupContainer: SWPopupView?
+            let customView = AddTrackPopupView(trackName:name)
+            customView.closeHandler = {
+                self?.distanceManager.clear()
+                self?.trackManager.endRecord()
+                popupContainer?.dismiss()
+            }
+            customView.confirmHandler = { name in
+                self?.viewModel.checkValidTrackName(name) {[weak self] errorMsg in
+                    if let errorMsg = errorMsg {
+                        UIWindow.topWindow?.sw_showWarningToast(errorMsg)
+                    } else {
+                        customView.endEditing(true)
+                        self?.trackManager.saveRoute(name: name!) { [weak self] in
+                            self?.trackManager.endRecord()
+                            popupContainer?.dismiss()
+                        }
+                    }
+                }
+            }
+            popupContainer = SWPopupView.showFromBottom(contentView: customView,
+                                                        configuration: SWPopupConfiguration(dismissOnMaskTap: false))
+        }
+        
     }
     
     private func presentRouteDetail(data: MarkerData) {
@@ -1074,17 +1081,22 @@ extension MapViewController {
         }
         customView.deleteHandler = {
             popupContainer?.dismiss()
-            guard let routeId = Int64(data.id) else {
-                return
-            }
+            let routeId = String(data.id)
             self.view.sw_showLoading()
-            self.routeManager.deleteRoute(routeId) { success in
-                self.view.sw_showLoading()
+            self.routeManager.deleteRoute(routeId) { [weak self] success in
+                self?.view.sw_hideLoading()
                 if success {
-                    guard let markerLayerManager = self.mapManager.markerLayerManager else {
+                    guard let markerLayerManager = self?.mapManager.markerLayerManager else {
                         return
                     }
+                    //移除线
                     markerLayerManager.removeMarker("\(routeId)", from: "myRoutesLine")
+                    //移除点
+                    if let points = self?.routeManager.getPointsInRoute(routeId: routeId), points.count > 1 {
+                        points.forEach { coordinate in
+                            markerLayerManager.removeMarker(String(coordinate.longitude), from: "myRoutesNode")
+                        }
+                    }
                 }
             }
         }
@@ -1093,7 +1105,7 @@ extension MapViewController {
     
     private func prsentTrackRecordVC() {
         let trackRecordVC = TrackRecordViewController()
-        trackRecordVC.records = trackManager.getTrackRecords()
+        trackRecordVC.records = trackManager.getAllRoutes()
         trackRecordVC.onClickCloseHandler = {[weak self] in
             self?.distanceManager.clear()
         }
@@ -1368,7 +1380,7 @@ extension MapViewController {
             return
         }
         
-        for route in self.routeManager.getAllRoutes() ?? [] {
+        for route in self.routeManager.getAllRoutes() {
             let routeId = route.id
             if let points = self.routeManager.getPointsInRoute(routeId: routeId), points.count > 1 {
                 let coordinates = points.map { CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude) }

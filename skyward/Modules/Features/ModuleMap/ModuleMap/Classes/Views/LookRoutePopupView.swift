@@ -138,6 +138,8 @@ class LookRoutePopupView: UIView, SWPopupContentView {
     }
     
     @objc private func confirmButtonTapped() {
-        self.deleteHandler?()
+        SWAlertView.showAlert(title: nil, message: "确定删除该路线吗？") {
+            self.deleteHandler?()
+        }
     }
 }

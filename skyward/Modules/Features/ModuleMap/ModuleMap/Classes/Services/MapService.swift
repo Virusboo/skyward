@@ -41,11 +41,11 @@ public class MapService {
     
     // MARK: - 删除路线
     @available(iOS 13.0, *)
-    public func deleteRoute(_ routeId: Int64) async throws -> Response {
+    public func deleteRoute(_ routeId: String) async throws -> Response {
         return try await provider.request(.deleteRoute(routeId))
     }
     
-    public func deleteRoute(_ routeId: Int64, completion: @escaping (Result<Response, MoyaError>) -> Void) {
+    public func deleteRoute(_ routeId: String, completion: @escaping (Result<Response, MoyaError>) -> Void) {
         provider.request(.deleteRoute(routeId), completion: completion)
     }
     

@@ -15,7 +15,7 @@ import SWKit
 public enum MapAPI {
     case getRouteList(_ model: RouteListModel)                            // 获取用户路线列表
     case getRouteMsg(_ model: RouteMsgModel)                              // 获取路线详情
-    case deleteRoute(_ routeId: Int64)                                    // 删除路线
+    case deleteRoute(_ routeId: String)                                   // 删除路线
     case getWeatherMap                                                    // 获取天气地图
     case searchMapMsgWithAddressName(_ address: String)                   // 搜索--通过地名
     case searchMapMsgWithLocation(_ location: String)                     // 搜索--通过经纬度

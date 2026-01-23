@@ -7,10 +7,16 @@
 
 import SWKit
 import WCDBSwift
+import TXKit
+
+public enum RouteType: Int {
+    case route
+    case track
+}
 
 // 路线/轨迹记录
-struct RouteRecord: TableCodable {
-    var id: Int64 = Int64(Date().timeIntervalSince1970)
+struct Route: TableCodable {
+    var id: String = String(Date().timeIntervalSince1970)
     var routeName: String?
     var startName: String?
     var startLongitude: Double?
@@ -19,13 +25,13 @@ struct RouteRecord: TableCodable {
     var endLongitude: Double?
     var endLatitude: Double?
     var distance: Double?
-    var travelTime: Int?
+    var travelTime: Int32?
     var description: String?
     var fileUrl: String?
     var type: Int?
     
     enum CodingKeys: String, CodingTableKey {
-        typealias Root = RouteRecord
+        typealias Root = Route
         
         case id
         case routeName
@@ -82,5 +88,95 @@ struct RecordPoint {
     func toString() -> String {
         let timeInterval = timestamp.timeIntervalSince1970
         return "\(latitude),\(longitude),\(altitude),\(timeInterval)"
+    }
+}
+
+// MARK: 老数据结构
+
+struct RouteRecord: TableCodable {
+    let routeId: UInt64?
+    var name: String?
+    var desc: String?
+    var uploadStatus: Int?
+    
+    enum CodingKeys: String, CodingTableKey {
+        typealias Root = RouteRecord
+        
+        case routeId
+        case name
+        case desc
+        case uploadStatus
+        
+        static let objectRelationalMapping = TableBinding(CodingKeys.self) {
+            BindColumnConstraint(routeId, isPrimary: true)
+        }
+    }
+}
+
+
+struct RoutePoint: TableCodable {
+    let routeId: UInt64?
+    let longitude: Double
+    let latitude: Double
+    var altitude: Double
+    var timestamp: UInt64
+    
+    enum CodingKeys: String, CodingTableKey {
+        typealias Root = RoutePoint
+        
+        case routeId
+        case longitude
+        case latitude
+        case altitude
+        case timestamp
+        
+        static let objectRelationalMapping = TableBinding(CodingKeys.self)
+    }
+}
+
+enum UploadStatus: Int, Codable, ColumnCodable {
+    case notUploaded  // 未上传
+    case uploaded     // 已上传
+    case uploading    // 上传中
+    
+    public static var columnType: WCDBSwift.ColumnType {
+        return .integer32
+    }
+    
+    public init?(with value: WCDBSwift.Value) {
+        self.init(rawValue: Int(value.int32Value))
+    }
+    
+    public func archivedValue() -> WCDBSwift.Value {
+        return FundamentalValue.init(Int32(self.rawValue))
+    }
+}
+
+struct TrackRecord: TableCodable {
+    var id: UInt64 = UInt64(Date().timeIntervalSince1970)
+    var name: String = DateFormatter.fullPretty.string(from: Date())
+    var localFileUrl: String?
+    var uploadStatus: UploadStatus = .notUploaded
+    var isLook: Bool = false
+    
+    enum CodingKeys: String, CodingTableKey {
+        typealias Root = TrackRecord
+        
+        case id
+        case name
+        case localFileUrl
+        case uploadStatus
+        case isLook
+        
+        static let objectRelationalMapping = TableBinding(CodingKeys.self) {
+            BindColumnConstraint(id, isPrimary: true)
+        }
+    }
+    
+    func fileFullURL() -> URL? {
+        guard let fileUrl = localFileUrl, let fileURL = SandBox.docmentsURL?.appendingPathComponent(fileUrl) else {
+            return nil
+        }
+        return fileURL
     }
 }

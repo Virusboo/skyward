@@ -7,76 +7,71 @@
 
 import Foundation
 import CoreLocation
-import SWKit
-import WCDBSwift
 
-
-struct RoutePoint: TableCodable {
-    let routeId: UInt64?
-    let longitude: Double?
-    let latitude: Double?
-    var altitude: Double?
-    var timestamp: UInt64?
+class RouteManager: NSObject {
+    private let dataManager = RouteDataManager()
     
-    enum CodingKeys: String, CodingTableKey {
-        typealias Root = RoutePoint
-        
-        case routeId
-        case longitude
-        case latitude
-        case altitude
-        case timestamp
-        
-        static let objectRelationalMapping = TableBinding(CodingKeys.self)
+    
+    // MARK: - Initializer
+    override init() {
+        super.init()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appDidTermination),
+            name: UIApplication.willTerminateNotification,
+            object: nil
+        )
     }
-}
-
-
-class RouteManager {
-    private let dataManager = TrackDataManager()
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
     
     func startRecord() {
         dataManager.startRecord()
     }
     
-    func stopRecord() {
-        dataManager.stopRecord()
+    func endRecord() {
+        dataManager.endRecord()
     }
+    
+    // MARK: - 增删改查
     
     func writePoint(_ point: CLLocationCoordinate2D) {
         let point = RecordPoint(latitude: point.latitude, longitude: point.longitude)
         dataManager.writePointToTxtFile(point)
     }
     
-    func getAllRoutes() -> [RouteRecord]? {
-        return dataManager.getRouteRecords(type: .route)
+    func getAllRoutes() -> [Route] {
+        return dataManager.getRoutes(type: .route)
     }
 
-    func getPointsInRoute(routeId: Int64) -> [CLLocationCoordinate2D]? {
+    func getPointsInRoute(routeId: String) -> [CLLocationCoordinate2D]? {
         return dataManager.readCoordinatesFromGPXFile(from: routeId)
-        
     }
     
-    func saveRoute(name: String, desc: String?) {
-        guard let sessionRecordId = dataManager.sessionRecordId else {
+    func saveRoute(name: String, desc: String?, completion: @escaping ()->Void) {
+        guard let sessionRouteId = dataManager.sessionRouteId else {
             return
         }
 
-        let record = RouteRecord(id: sessionRecordId, routeName: name, description: desc)
-        dataManager.saveRouteToService(record) { [weak self] success, errorMsg in
+        let route = Route(id: sessionRouteId, routeName: name, description: desc, type: 0)
+        UIWindow.topWindow?.sw_showLoading()
+        dataManager.saveRouteToService(route) { [weak self] rspRoute, errorMsg in
             UIWindow.topWindow?.sw_hideLoading()
-            if success {
+            if let rspRoute = rspRoute {
+                self?.dataManager.saveSessionRouteToLocal(rspRoute)
                 UIWindow.topWindow?.sw_showSuccessToast("保存成功")
             } else {
                 if let msg = errorMsg {
                     UIWindow.topWindow?.sw_showWarningToast(msg)
                 }
             }
-            self?.stopRecord()
+            completion()
         }
     }
     
-    func deleteRoute(_ routeId: Int64, completion: ((Bool) -> Void)?) {
+    func deleteRoute(_ routeId: String, completion: ((Bool) -> Void)?) {
         dataManager.deleteRouteFromService(routeId: routeId) { success, errorMsg in
             completion?(success)
             
@@ -84,5 +79,12 @@ class RouteManager {
                 UIWindow.topWindow?.sw_showWarningToast(msg)
             }
         }
+    }
+    
+    //MARK: - Notification
+    
+    @objc func appDidTermination() {
+        // 如果正在记录，杀程序需要endRecord
+        endRecord()
     }
 }

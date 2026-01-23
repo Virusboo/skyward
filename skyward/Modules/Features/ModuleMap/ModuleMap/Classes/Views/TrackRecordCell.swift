@@ -106,7 +106,7 @@ class TrackRecordCell: BaseCell {
         }
     }
     
-    func configure(with record: RouteRecord) {
+    func configure(with record: Route) {
         nameLabel.text = record.routeName
 //        uploadLabel.isHidden = record.uploadStatus == .uploaded
 //        uploadButton.isHidden = record.uploadStatus == .uploaded

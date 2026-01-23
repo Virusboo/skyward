@@ -20,7 +20,6 @@ public class LocationManager: NSObject {
     
     // MARK: - Properties
     private let locationManager = CLLocationManager()
-    private let geocoder = CLGeocoder()
     public var authorizationStatus: CLAuthorizationStatus {
         get {
             locationManager.authorizationStatus
@@ -147,49 +146,52 @@ public class LocationManager: NSObject {
     }
 
     // MARK: - Reverse Geocoding
-    /// 反地理编码：将坐标转换为地址信息
+
+    /// 获取地址信息（便捷方法，带超时，使用独立的 geocoder 实例）
     /// - Parameters:
     ///   - location: 要转换的坐标位置
-    ///   - completion: 完成回调，返回 CLPlacemark（包含地址信息）或错误
-    public func reverseGeocode(location: CLLocation, completion: @escaping ReverseGeocodeCompletion) {
-        // 取消之前的请求，避免多个请求同时进行
-        geocoder.cancelGeocode()
+    ///   - timeout: 超时时间（秒），默认 2 秒
+    ///   - completion: 完成回调，返回 CLPlacemark（包含地址信息）
+    public func reverseGeocode(location: CLLocation, timeout: TimeInterval = 2.0, completion: @escaping (CLPlacemark?) -> Void) {
+        // 为每个请求创建独立的 geocoder 实例，避免并发请求相互取消
+        let independentGeocoder = CLGeocoder()
+        var hasCompleted = false
 
-        geocoder.reverseGeocodeLocation(location) { [weak self] placemarks, error in
-            guard let self = self else { return }
+        // 超时处理
+        let timeoutWorkItem = DispatchWorkItem {
+            guard !hasCompleted else { return }
+            hasCompleted = true
+            debugPrint("反地理编码超时")
+            independentGeocoder.cancelGeocode()
+            completion(nil)
+        }
+
+        // 执行超时任务
+        DispatchQueue.main.asyncAfter(deadline: .now() + timeout, execute: timeoutWorkItem)
+
+        debugPrint("反地理编码经度：\(location.coordinate.longitude),纬度: \(location.coordinate.latitude)")
+
+        // 执行反地理编码
+        independentGeocoder.reverseGeocodeLocation(location) { placemarks, error in
+            guard !hasCompleted else { return }
+            hasCompleted = true
+            timeoutWorkItem.cancel()
 
             if let error = error {
-                // 处理错误
                 debugPrint("反地理编码失败: \(error.localizedDescription)")
-                completion(nil, error)
+                completion(nil)
                 return
             }
 
-            // 获取第一个地标
             guard let placemark = placemarks?.first else {
-                let error = NSError(domain: "LocationError", code: 103, userInfo: [NSLocalizedDescriptionKey: "未找到地址信息"])
-                completion(nil, error)
+                debugPrint("反地理编码失败: 未找到地址信息")
+                completion(nil)
                 return
             }
 
-            debugPrint("反地理编码成功: \(placemark.name ?? "未知位置"), \(placemark.locality ?? "")")
-            completion(placemark, nil)
+            debugPrint("反地理编码成功: \(placemark.subLocality ?? "未知位置"), \(placemark.locality ?? "")")
+            completion(placemark)
         }
-    }
-
-    /// 反地理编码：使用经纬度进行转换
-    /// - Parameters:
-    ///   - latitude: 纬度
-    ///   - longitude: 经度
-    ///   - completion: 完成回调，返回 CLPlacemark（包含地址信息）或错误
-    public func reverseGeocode(latitude: Double, longitude: Double, completion: @escaping ReverseGeocodeCompletion) {
-        let location = CLLocation(latitude: latitude, longitude: longitude)
-        reverseGeocode(location: location, completion: completion)
-    }
-
-    /// 取消当前的反地理编码请求
-    public func cancelReverseGeocode() {
-        geocoder.cancelGeocode()
     }
 }
 

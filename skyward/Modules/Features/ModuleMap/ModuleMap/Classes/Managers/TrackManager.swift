@@ -17,7 +17,7 @@ public class TrackManager: NSObject {
     // MARK: - Properties
     var recording: Bool = false
     private let locationManager = CLLocationManager()
-    private let dataManager = TrackDataManager()
+    private let dataManager = RouteDataManager()
     private var lastLocation: CLLocation?
     // 定位更新的回调
     var locationUpdateCompletion: ((CLLocationCoordinate2D?, Error?) -> Void)?
@@ -93,8 +93,8 @@ public class TrackManager: NSObject {
         locationManager.stopUpdatingLocation()
     }
     
-    func finishRecord() {
-        dataManager.stopRecord()
+    func endRecord() {
+        dataManager.endRecord()
         lastLocation = nil
     }
     
@@ -105,11 +105,10 @@ public class TrackManager: NSObject {
         guard validateLocation(location) else {
             return
         }
-        // 创建定位点
-        let point = RecordPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, altitude: location.altitude, timestamp: location.timestamp)
-        if dataManager.writePointToTxtFile(point) {
-            locationUpdateCompletion?(location.coordinate, nil)
-        }
+        // 写入点到本地
+        writePoint(location)
+        
+        locationUpdateCompletion?(location.coordinate, nil)
     }
     
     /// 校验新位置点是否合法
@@ -142,56 +141,88 @@ public class TrackManager: NSObject {
             return false
         }
         
-        // 检查2: 是否与上一个点完全相同
-        if abs(lastLocation.coordinate.latitude - newLocation.coordinate.latitude) < 0.000001 &&
-            abs(lastLocation.coordinate.longitude - newLocation.coordinate.longitude) < 0.000001 {
-            debugPrint("检测到完全相同的轨迹点，已跳过记录")
-            return false
-        }
-        
         // 通过所有校验，点合法
         return true
     }
     
     // MARK: - 增删改查
     
-    func saveRoute(name: String) {
-        guard let sessionRecordId = dataManager.sessionRecordId else {
-            return
-        }
-        
-        let record = RouteRecord(id: sessionRecordId, routeName: name)
-        dataManager.saveRouteToLocal(record)
-
-        finishRecord()
+    func writePoint(_ location: CLLocation) {
+        let point = RecordPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, altitude: location.altitude, timestamp: location.timestamp)
+        dataManager.writePointToTxtFile(point)
     }
     
-    func getTrackRecords() -> [RouteRecord] {
-        let result = dataManager.getRouteRecords(type: .track)
+    func getAllRoutes() -> [Route] {
+        let result = dataManager.getRoutes(type: .track)
         
-        guard let sessionRecordId = dataManager.sessionRecordId else {
+        guard let sessionRouteId = dataManager.sessionRouteId else {
             return result
         }
         
-        return result.filter({$0.id != sessionRecordId})
+        return result.filter({$0.id != sessionRouteId})
+    }
+
+    func getPointsInRoute(routeId: String) -> [CLLocationCoordinate2D]? {
+        return dataManager.readCoordinatesFromGPXFile(from: routeId)
     }
     
-    func getSessionTrackName() -> String {
-        return DateFormatter.fullPretty.string(from: Date())
+    func saveRoute(name: String, completion: @escaping ()->Void) {
+        guard let sessionRouteId = dataManager.sessionRouteId else {
+            return
+        }
+        let route = Route(id: sessionRouteId, routeName: name, type: 1)
+        guard dataManager.saveSessionRouteToLocal(route) else {
+            completion()
+            return
+        }
+        UIWindow.topWindow?.sw_showLoading()
+        dataManager.saveRouteToService(route) { [weak self] rspRoute, errorMsg in
+            UIWindow.topWindow?.sw_hideLoading()
+            if let rspRoute = rspRoute {
+                self?.dataManager.updateLocalRouteWithRemote(local: route, remote: rspRoute)
+                UIWindow.topWindow?.sw_showSuccessToast("保存成功")
+            } else {
+                if let msg = errorMsg {
+                    UIWindow.topWindow?.sw_showWarningToast(msg)
+                }
+            }
+            completion()
+        }
+    }
+    
+    func deleteRoute(_ routeId: String, completion: ((Bool) -> Void)?) {
+        dataManager.deleteRouteFromService(routeId: routeId) { success, errorMsg in
+            completion?(success)
+            
+            if success == false, let msg = errorMsg {
+                UIWindow.topWindow?.sw_showWarningToast(msg)
+            }
+        }
+    }
+    
+    func getSessionRouteDefaultName(completion: @escaping (String) -> Void)  {
+        return dataManager.getSessionRouteDefaultName(completion: completion)
     }
     
     //MARK: - Notification
     
     @objc func appDidTermination() {
-        if recording {
-            saveRoute(name: getSessionTrackName())
+        guard let sessionRouteId = dataManager.sessionRouteId else {
+            return
         }
+        getSessionRouteDefaultName { name in
+            let route = Route(id: sessionRouteId, routeName: name, type: 1)
+            self.dataManager.saveSessionRouteToLocal(route)
+        }
+        
     }
 
     //MARK: - Test
     func testSavePoints() {
         // 批量写入轨迹点
-        dataManager.writeRecordPoints(sampleRecords())
+        sampleRecords().forEach { point in
+            self.dataManager.writePointToTxtFile(point)
+        }
     }
     
     func sampleRecords() -> [RecordPoint] {

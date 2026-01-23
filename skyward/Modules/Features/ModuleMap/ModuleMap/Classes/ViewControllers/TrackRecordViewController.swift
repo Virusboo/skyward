@@ -13,15 +13,15 @@ import SWTheme
 class TrackRecordViewController: UIViewController {
     var customTransitioningDelegate: CustomTransitioningDelegate?
     
-    var records: [RouteRecord] = []
+    var records: [Route] = []
     
     var onClickCloseHandler: (() -> (Void))?
     var onClickLookHandler: (([CLLocationCoordinate2D]) -> (Void))?
     var onClickUnLookHandler: (() -> (Void))?
     var onClickDeleteHandler: ((Bool) -> (Void))?
     
-    private lazy var recordDataManager: TrackDataManager = {
-        let mgr = TrackDataManager()
+    private lazy var recordDataManager: RouteDataManager = {
+        let mgr = RouteDataManager()
         return mgr
     }()
     
@@ -125,25 +125,26 @@ class TrackRecordViewController: UIViewController {
         ])
     }
     
-    func uploadRouteRecord(_ record: RouteRecord) {
-        view.sw_showLoading()
-        recordDataManager.saveRouteToService(record) { [weak self] success, errorMsg in
-            self?.view.sw_hideLoading()
-            if success {
-                
-            } else {
-                if let msg = errorMsg {
-                    self?.view.sw_showWarningToast(msg)
-                }
-            }
-        }
+    func uploadRoute(_ route: Route) {
+//        view.sw_showLoading()
+//        recordDataManager.saveRouteToService(route) { [weak self] rspRoute, errorMsg in
+//            self?.view.sw_hideLoading()
+//            if let rspRoute = rspRoute {
+//                self?.view.sw_showSuccessToast("上传成功")
+//                self?.recordDataManager.replaceRouteFromOldToNew(old: route, new: rspRoute)
+//            } else {
+//                if let msg = errorMsg {
+//                    self?.view.sw_showWarningToast(msg)
+//                }
+//            }
+//        }
     }
     
-    func lookRouteRecord(_ record: RouteRecord) {
+    func lookRoute(_ record: Route) {
 
     }
     
-    func deleteRouteRecord(_ record: RouteRecord) {
+    func deleteRoute(_ record: Route) {
         SWAlertView.showAlert(title: nil, message: "确定删除轨迹吗？") {
             self.recordDataManager.deleteRouteFromService(routeId: record.id, completion: { [weak self] success, errorMsg in
                 self?.onClickDeleteHandler?(true)
@@ -171,14 +172,14 @@ extension TrackRecordViewController: UITableViewDelegate, UITableViewDataSource 
         let record = records[indexPath.row]
         cell.configure(with: record)
         cell.onClickUploadHandler = {[weak self] in
-            self?.uploadRouteRecord(record)
+            self?.uploadRoute(record)
         }
         cell.onClickLookHandler = {[weak self] in
-//            self?.lookRouteRecord(record)
+//            self?.lookRoute(record)
         }
         
         cell.onClickDeleteHandler = {[weak self] in
-            self?.deleteRouteRecord(record)
+            self?.deleteRoute(record)
         }
         return cell
     }
