@@ -45,6 +45,8 @@ sources:
 scene:
     terrain_3d: false
     elevation_source: elevation
+    background:
+        color: '#F2F3F4'
 textures:
     loc-marker:
         density: 2
@@ -145,6 +147,7 @@ styles:
         mix: terrain-3d
         # blend_order: 10000
         lighting: false
+        blend: overlay
     # unlit-lines:
     #     base: lines
     #     mix: global.terrain_3d_mixin

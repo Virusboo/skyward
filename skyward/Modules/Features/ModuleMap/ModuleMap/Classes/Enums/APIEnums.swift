@@ -21,7 +21,7 @@ public enum MapAPI {
     case searchMapMsgWithLocation(_ location: String)                     // 搜索--通过经纬度
     case getPointWeatherData(_ location: CLLocationCoordinate2D)          // 获取点击位置的天气信息
     case saveUserPOI(_ model: UserPOIModel)                               // 保存兴趣点
-    case saveUserRoute(type: Int, name: String, desc: String?, fileUrl: String)      // 保存路线
+    case saveUserRoute(params: [String : Any])                            // 保存路线
     case saveUserTrack(name: String, fileUrl: String)                     // 保存轨迹
     case getWeatherWarningMsg(_ location: CLLocationCoordinate2D)         // 获取天气预警信息
     case getEveryHoursWeatherMsg(_ location: CLLocationCoordinate2D)      // 获取每小时天气信息
@@ -156,12 +156,9 @@ extension MapAPI: NetworkAPI {
                 parameters: model.toDictionary(),
                 encoding: JSONEncoding.default
             )
-        case .saveUserRoute(let type, let name, let desc, let fileUrl):
+        case .saveUserRoute(let params):
             return .requestParameters(
-                parameters: ["routeName": name,
-                             "description": desc ?? "",
-                             "fileUrl": fileUrl,
-                             "type": type],
+                parameters: params,
                 encoding: JSONEncoding.default
             )
         case .saveUserTrack(let name, let fileUrl):

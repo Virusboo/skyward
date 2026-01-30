@@ -5,21 +5,34 @@
 //  Created by 赵波 on 2025/11/11.
 //
 
+import UIKit
 import TXKit
 import TXRouterKit
 import SWKit
 import ModuleBootstrap
 import ModuleHome
+import ModulePersonal
+import ModuleMap
+import ModuleMessage
+import ModuleTeam
+import ModuleLogin
+import SWNetwork
+import Combine
 
 @main
+
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
+    private var cancellables = Set<AnyCancellable>()
+    
+    /// 设置该属性，配置所有的应用模块
+    private var modules: [ModuleType] = []
     
     // MARK: - Config && Process
     /// 配置所有的应用模块
     func setupModules() -> [ModuleType] {
-        return [HomeModule()]
+        return [HomeModule(), MapModule(), MessageModule(),  PersonalModule(), TeamModule(), LoginModule()]
     }
     /// 配置所有的服务
     func setupServices() -> [AppServiceType] {
@@ -39,8 +52,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 // MARK: - Life Cycle
 extension AppDelegate {
     
-    func application(_ application: UIApplication,
-                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
+    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        // 初始化日志管理器
+        Logger.registe(with: .other) //TODO:根据环境来配置
+        
+        if UserManager.shared.isLogin {
+            //初始化数据库
+            DBManager.shared.initDb(userId: UserManager.shared.userId)
+            //MQTT开始链接
+            MQTTManager.shared.connect()
+        }
         
         for service in _sortedServices {
             service.application(application, didFinishLaunchingWithOptions: launchOptions)
@@ -52,12 +73,35 @@ extension AppDelegate {
             Router.default.registe(module.routeSettings)
         }
         
+        if UserManager.shared.isLogin {
+            //消息模块监听消息
+            SWRouter.handle(RouteTable.startMonitorMessage)
+            //组队模块监听消息
+            SWRouter.handle(RouteTable.teamStartMonitorMessage)
+        }
+        
+        // 在后台线程检查并刷新快过期的token，避免阻塞UI启动 暂时写这里，后面移至SWWakeUpService
+        DispatchQueue.global().async {
+            TokenManager.shared.proactivelyRefreshToken { _ in }
+        }
+
+        NetworkMonitor.shared.startMonitoring()
+        // 初始化地图
+        MapConfig.shared.resetToDefaults()
+        // 下载公共兴趣点
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            POIDownloadManager.shared.startSilentDownload()
+        }
+        // 判断pro的固件版本
+        AppLaunchManager.shared.performLaunchTasks()
+        
         DispatchQueue.main.async {
             let aWindow = UIWindow(frame: UIScreen.main.bounds)
             self.window = aWindow
+            self.window?.backgroundColor = .white
             Bootstrap.shared.window = aWindow
             Bootstrap.shared.runMainFlow()
-            aWindow.makeKeyAndVisible()
+            self.window?.makeKeyAndVisible()
         }
 
         return true

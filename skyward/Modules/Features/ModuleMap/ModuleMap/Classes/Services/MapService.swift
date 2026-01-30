@@ -121,12 +121,12 @@ public class MapService {
     
     // MARK: - 保存路线
     @available(iOS 13.0, *)
-    public func saveUserRoute(type: Int, name: String, desc: String?, fileUrl: String) async throws -> Response {
-        return try await provider.request(.saveUserRoute(type: type, name: name, desc: desc, fileUrl: fileUrl))
+    public func saveUserRoute(params: [String : Any]) async throws -> Response {
+        return try await provider.request(.saveUserRoute(params: params))
     }
     
-    public func saveUserRoute(type: Int,  name: String, desc: String?, fileUrl: String, completion: @escaping (Result<Response, MoyaError>) -> Void) {
-        provider.request(.saveUserRoute(type: type, name: name, desc: desc, fileUrl: fileUrl), completion: completion)
+    public func saveUserRoute(params: [String : Any], completion: @escaping (Result<Response, MoyaError>) -> Void) {
+        provider.request(.saveUserRoute(params: params), completion: completion)
     }
     
     // MARK: - 保存轨迹

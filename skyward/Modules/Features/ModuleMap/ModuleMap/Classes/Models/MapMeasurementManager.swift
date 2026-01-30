@@ -78,11 +78,7 @@ public class DistanceMeasurementManager {
     func addRouteLine(at coordinate: CLLocationCoordinate2D) {
         coordinates.append(coordinate)
         
-        if coordinates.count == 1 {
-            addStartPoint(at: coordinate)
-        } else {
-            addPoint(at: coordinate)
-        }
+        addPoint(at: coordinate)
         
         if coordinates.count >= 2 {
             addDistanceLine()
@@ -271,7 +267,28 @@ extension DistanceMeasurementManager {
 }
 // MARK: - Tool
 extension DistanceMeasurementManager {
-    
+
+    /// 计算所有坐标点的总距离
+    /// - Returns: 总距离（米）
+    func calculateTotalDistance() -> Double {
+        guard coordinates.count >= 2 else {
+            return 0
+        }
+
+        var totalDistance = 0.0
+        for i in 0..<(coordinates.count - 1) {
+            totalDistance += calculateDistance(from: coordinates[i], to: coordinates[i + 1])
+        }
+        return totalDistance
+    }
+
+    /// 获取格式化的总距离字符串
+    /// - Returns: 格式化后的距离字符串（如 "1.2km" 或 "500.5m"）
+    func getTotalDistanceString() -> String {
+        let totalDistance = calculateTotalDistance()
+        return formatDistance(totalDistance)
+    }
+
     private func calculateDistance(from start: CLLocationCoordinate2D, to end: CLLocationCoordinate2D) -> Double {
         let startLocation = CLLocation(latitude: start.latitude, longitude: start.longitude)
         let endLocation = CLLocation(latitude: end.latitude, longitude: end.longitude)

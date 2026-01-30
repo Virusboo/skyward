@@ -40,7 +40,7 @@ public class MapManager: NSObject {
     public var onLayerVisibilityChanged: ((String, Bool) -> Void)?
     public var onLocationPermissionChanged: ((CLAuthorizationStatus) -> Void)?
     public var onTileSourceChanged: ((String) -> Void)? // 地图源切换回调
-    public var onMapSingleTapHandler: ((CLLocationCoordinate2D) -> Void)?
+    public var onMapSingleTapHandler: ((CLLocationCoordinate2D, CGPoint) -> Void)?
     public var onAddCustomMarker: ((CLLocationCoordinate2D, CGPoint) -> Void)?
     public var onMapPanHandler: (() -> Void)?
     
@@ -473,6 +473,29 @@ public class MapManager: NSObject {
         }
     }
     
+    public func createWeatherPointMarker(with coordinate: CLLocationCoordinate2D) {
+        guard let mapView = mapView else { return }
+        
+        if let marker = pointLocationMarker {
+            mapView.markerRemove(marker)
+            pointLocationMarker = nil
+        }
+        
+        // 创建用户位置标记
+        pointLocationMarker = mapView.markerAdd()
+        pointLocationMarker?.point = coordinate
+        pointLocationMarker?.stylingString = """
+        { style: 'points',
+          interactive: false,
+          color: 'white',
+          size: [40px, 40px],
+          order: 1005,
+          collide: false }
+        """
+        pointLocationMarker?.icon = SWKitModule.image(named: "measure_start2")!
+        
+    }
+    
     // MARK: - 私有方法
     
     private func createUserLocationMarker() {
@@ -614,7 +637,7 @@ extension MapManager: TGRecognizerDelegate {
         let coordinate = mapView.coordinate(fromViewPosition: location)
         print("单点手势位置：经度=\(coordinate.longitude)--纬度=\(coordinate.latitude)")
 
-        onMapSingleTapHandler?(coordinate)
+        onMapSingleTapHandler?(coordinate, location)
         
         if isAddPOIStatus {
             onAddCustomMarker?(coordinate, location)

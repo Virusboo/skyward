@@ -79,7 +79,7 @@ public class TrackManager: NSObject {
         }
         recording = true
         
-        dataManager.startRecord()
+        dataManager.startRecord(type: .track)
         // 启动持续定位更新（使用startUpdatingLocation而非requestLocation）
         // 系统会根据distanceFilter和desiredAccuracy自动推送位置更新
         // 系统会自动保持定位服务在后台运行，无需额外的后台保活机制
@@ -149,13 +149,13 @@ public class TrackManager: NSObject {
     
     func writePoint(_ location: CLLocation) {
         let point = RecordPoint(latitude: location.coordinate.latitude, longitude: location.coordinate.longitude, altitude: location.altitude, timestamp: location.timestamp)
-        dataManager.writePointToTxtFile(point)
+        dataManager.writePointToSessionTxtFile(point)
     }
     
     func getAllRoutes() -> [Route] {
         let result = dataManager.getRoutes(type: .track)
         
-        guard let sessionRouteId = dataManager.sessionRouteId else {
+        guard let sessionRouteId = dataManager.sessionRoute?.id else {
             return result
         }
         
@@ -167,11 +167,8 @@ public class TrackManager: NSObject {
     }
     
     func saveRoute(name: String, completion: @escaping ()->Void) {
-        guard let sessionRouteId = dataManager.sessionRouteId else {
-            return
-        }
-        let route = Route(id: sessionRouteId, routeName: name, type: 1)
-        guard dataManager.saveSessionRouteToLocal(route) else {
+        dataManager.updateSessionRoute(name: name)
+        guard let route = dataManager.sessionRoute, dataManager.saveSessionRouteToLocal(route) else {
             completion()
             return
         }
@@ -181,12 +178,12 @@ public class TrackManager: NSObject {
             if let rspRoute = rspRoute {
                 self?.dataManager.updateLocalRouteWithRemote(local: route, remote: rspRoute)
                 UIWindow.topWindow?.sw_showSuccessToast("保存成功")
+                completion()
             } else {
                 if let msg = errorMsg {
                     UIWindow.topWindow?.sw_showWarningToast(msg)
                 }
             }
-            completion()
         }
     }
     
@@ -200,28 +197,28 @@ public class TrackManager: NSObject {
         }
     }
     
-    func getSessionRouteDefaultName(completion: @escaping (String) -> Void)  {
-        return dataManager.getSessionRouteDefaultName(completion: completion)
+    func getSessionRoute(completion: @escaping (Route?) ->Void) {
+        dataManager.assembleSessionRoute { [weak self] in
+            completion(self?.dataManager.sessionRoute)
+        }
     }
     
     //MARK: - Notification
     
     @objc func appDidTermination() {
-        guard let sessionRouteId = dataManager.sessionRouteId else {
+        guard let route = dataManager.sessionRoute else {
             return
         }
-        getSessionRouteDefaultName { name in
-            let route = Route(id: sessionRouteId, routeName: name, type: 1)
-            self.dataManager.saveSessionRouteToLocal(route)
+        dataManager.assembleSessionRoute { [weak self] in
+            self?.dataManager.saveSessionRouteToLocal(route)
         }
-        
     }
 
     //MARK: - Test
     func testSavePoints() {
         // 批量写入轨迹点
         sampleRecords().forEach { point in
-            self.dataManager.writePointToTxtFile(point)
+            self.dataManager.writePointToSessionTxtFile(point)
         }
     }
     

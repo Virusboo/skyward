@@ -28,7 +28,7 @@ class RouteManager: NSObject {
     }
     
     func startRecord() {
-        dataManager.startRecord()
+        dataManager.startRecord(type: .route)
     }
     
     func endRecord() {
@@ -39,7 +39,7 @@ class RouteManager: NSObject {
     
     func writePoint(_ point: CLLocationCoordinate2D) {
         let point = RecordPoint(latitude: point.latitude, longitude: point.longitude)
-        dataManager.writePointToTxtFile(point)
+        dataManager.writePointToSessionTxtFile(point)
     }
     
     func getAllRoutes() -> [Route] {
@@ -51,23 +51,22 @@ class RouteManager: NSObject {
     }
     
     func saveRoute(name: String, desc: String?, completion: @escaping ()->Void) {
-        guard let sessionRouteId = dataManager.sessionRouteId else {
+        dataManager.updateSessionRoute(name: name, desc: desc)
+        guard let route = dataManager.sessionRoute else {
             return
         }
-
-        let route = Route(id: sessionRouteId, routeName: name, description: desc, type: 0)
         UIWindow.topWindow?.sw_showLoading()
         dataManager.saveRouteToService(route) { [weak self] rspRoute, errorMsg in
             UIWindow.topWindow?.sw_hideLoading()
             if let rspRoute = rspRoute {
                 self?.dataManager.saveSessionRouteToLocal(rspRoute)
                 UIWindow.topWindow?.sw_showSuccessToast("保存成功")
+                completion()
             } else {
                 if let msg = errorMsg {
                     UIWindow.topWindow?.sw_showWarningToast(msg)
                 }
             }
-            completion()
         }
     }
     
@@ -78,6 +77,12 @@ class RouteManager: NSObject {
             if success == false, let msg = errorMsg {
                 UIWindow.topWindow?.sw_showWarningToast(msg)
             }
+        }
+    }
+    
+    func getSessionRoute(completion: @escaping (Route?) ->Void) {
+        dataManager.assembleSessionRoute { [weak self] in
+            completion(self?.dataManager.sessionRoute)
         }
     }
     

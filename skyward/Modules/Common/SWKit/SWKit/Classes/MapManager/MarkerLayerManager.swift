@@ -98,7 +98,7 @@ public struct PointMarkerStyle: MarkerStyle {
             return PointMarkerStyle(size: [24, 32], order: 400)
         case "custom", "newCustom":
             return PointMarkerStyle(size: [24, 32], order: 700)
-        case "memberLocation", "safe", "sos":
+        case "memberLocation", "safe", "sos", "weather":
             return PointMarkerStyle(size: [32, 32], order: 701)
         case "myRoutesNode":
             return PointMarkerStyle(size: [8, 8], order: 501)
@@ -122,6 +122,8 @@ public struct PointMarkerStyle: MarkerStyle {
             return SWKitModule.image(named: "team_location_safe")
         case "sos":
             return SWKitModule.image(named: "team_location_sos")
+        case "weather":
+            return SWKitModule.image(named: "measure_start2")
         case "myRoutesNode":
             return SWKitModule.image(named: "map_node")
         default:

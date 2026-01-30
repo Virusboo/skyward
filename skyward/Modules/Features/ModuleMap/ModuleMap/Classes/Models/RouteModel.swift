@@ -6,6 +6,7 @@
 //
 
 import SWKit
+import SWTheme
 import WCDBSwift
 import TXKit
 
@@ -26,6 +27,7 @@ struct Route: TableCodable {
     var endLatitude: Double?
     var distance: Double?
     var travelTime: Int32?
+    var altitude: Double?
     var description: String?
     var fileUrl: String?
     var type: Int?
@@ -43,6 +45,7 @@ struct Route: TableCodable {
         case endLatitude
         case distance
         case travelTime
+        case altitude
         case description
         case fileUrl
         case type
@@ -50,6 +53,58 @@ struct Route: TableCodable {
         static let objectRelationalMapping = TableBinding(CodingKeys.self) {
             BindColumnConstraint(id, isPrimary: true)
         }
+    }
+    
+    func startDesc() -> NSAttributedString? {
+        guard let startName = startName else {
+            return nil
+        }
+        guard let startLongitude = startLongitude, let startLatitude = startLatitude else {
+            return nil
+        }
+        
+        let startLonDesc = startLongitude.convertToDMSString(isLongitude: true)
+        let startLatDesc = startLatitude.convertToDMSString(isLongitude: false)
+        let coordinateDesc = startLonDesc + "," + startLatDesc
+        
+        let range = NSRange(location: 0, length: startName.count)
+        let attributedString = NSMutableAttributedString(string: startName + "\n" + coordinateDesc,
+                                                         attributes: [
+                                                             .font: UIFont.pingFangFontRegular(ofSize: 12),
+                                                             .foregroundColor: ThemeManager.current.textColor
+                                                         ])
+        attributedString.addAttributes([
+            .font: UIFont.pingFangFontMedium(ofSize: 14),
+            .foregroundColor: ThemeManager.current.titleColor
+        ], range: range)
+        
+        return attributedString
+    }
+    
+    func endDesc() -> NSAttributedString? {
+        guard let endName = endName else {
+            return nil
+        }
+        guard let endLongitude = endLongitude, let endLatitude = endLatitude else {
+            return nil
+        }
+        
+        let endLonDesc = endLongitude.convertToDMSString(isLongitude: true)
+        let endLatDesc = endLatitude.convertToDMSString(isLongitude: false)
+        let coordinateDesc = endLonDesc + "," + endLatDesc
+        
+        let range = NSRange(location: 0, length: endName.count)
+        let attributedString = NSMutableAttributedString(string: endName + "\n" + coordinateDesc,
+                                                         attributes: [
+                                                             .font: UIFont.pingFangFontRegular(ofSize: 12),
+                                                             .foregroundColor: ThemeManager.current.textColor
+                                                         ])
+        attributedString.addAttributes([
+            .font: UIFont.pingFangFontMedium(ofSize: 14),
+            .foregroundColor: ThemeManager.current.titleColor
+        ], range: range)
+        
+        return attributedString
     }
 }
 

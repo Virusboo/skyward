@@ -18,7 +18,6 @@ class RouteDataManager {
     private let txtExtension = "txt"
     private let gpxExtension = "gpx"
     // 本次记录的相关属性
-    private(set) var sessionRouteId: String?
     private(set) var sessionRoute: Route?
 
     private lazy var uploadManager: UploadManager = {
@@ -37,8 +36,8 @@ class RouteDataManager {
     }()
     
     
-    func startRecord() {
-        sessionRouteId = String(Int64(Date().timeIntervalSince1970))
+    func startRecord(type: RouteType) {
+        sessionRoute = Route(id: String(Int64(Date().timeIntervalSince1970)), travelTime: 0, type: type.rawValue)
 
         // 创建空文件，确保后续写入时文件已存在
         if let fileURL = sessionTxtFileURL() {
@@ -48,13 +47,13 @@ class RouteDataManager {
     
     func endRecord() {
         deleteSessionTxtFile()
-        sessionRouteId = nil
+        sessionRoute = nil
     }
     
     // MARK: - 增删改查
     // 写入记录的点到文件
     @discardableResult
-    func writePointToTxtFile(_ point: RecordPoint) -> Bool {
+    func writePointToSessionTxtFile(_ point: RecordPoint) -> Bool {
         guard let txtFileURL = sessionTxtFileURL() else {
             return false
         }
@@ -229,89 +228,116 @@ class RouteDataManager {
         }
         return routes
     }
-    // 获取当前记录的路线/轨迹默认名称
-    func getSessionRouteDefaultName(completion: @escaping (String) -> Void) {
-        // 路线名称：默认起点的xx市xx区至终点的xx市xx区 YYYY-MM-DD HH:MM
-
+    
+    // MARK: - 更新session route
+    
+    func updateSessionRoute(name: String, desc: String? = nil) {
+        sessionRoute?.routeName = name
+        if let desc = desc {
+            sessionRoute?.description = desc
+        }
+    }
+    
+    func assembleSessionRoute(completion: @escaping () ->Void) {
+        guard sessionRoute != nil else {
+            return
+        }
         // 读取所有记录点
         let points = readPointsFromTxtFile(fileURL: sessionTxtFileURL())
 
-        guard points.count >= 2 else {
-            // 如果点太少，返回默认名称
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-            let timeString = dateFormatter.string(from: Date())
-            completion("未命名路线 \(timeString)")
+        guard points.count > 1 else {
             return
         }
+
+        // 计算总距离
+        var totalDistance: CLLocationDistance = 0
+        for i in 0..<points.count-1 {
+            autoreleasepool {
+                let currentPoint = points[i]
+                let nextPoint = points[i+1]
+                
+                let currentLocation = CLLocation(latitude: currentPoint.latitude, longitude: currentPoint.longitude)
+                let nextLocation = CLLocation(latitude: nextPoint.latitude, longitude: nextPoint.longitude)
+                
+                let distance = currentLocation.distance(from: nextLocation)
+                totalDistance += distance
+            }
+        }
+        
+        // 将距离转换为公里并存储
+        sessionRoute?.distance = totalDistance / 1000.0
 
         // 获取起点和终点
         let startPoint = points.first!
         let endPoint = points.last!
-
+        
+        sessionRoute?.startLongitude = startPoint.longitude
+        sessionRoute?.startLatitude = startPoint.latitude
+        sessionRoute?.endLongitude = endPoint.longitude
+        sessionRoute?.endLatitude = endPoint.latitude
+        
         // 日期格式化
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
         let timeString = dateFormatter.string(from: endPoint.timestamp)
-
+        
         // 存储地址信息
-        var startLocation = ""
-        var endLocation = ""
+        var startShortName = ""
+        var endShortName = ""
         
         // 使用调度组等待两个异步操作完成
         let group = DispatchGroup()
-        
-        debugPrint("开始获取默认路线名称")
 
         // 起点逆地理编码
         group.enter()
-        let startCoordinate = CLLocation(latitude: startPoint.latitude, longitude: startPoint.longitude)
-        locationManager.reverseGeocode(location: startCoordinate) { placemark in
+        let startLocation = CLLocation(latitude: startPoint.latitude, longitude: startPoint.longitude)
+        locationManager.reverseGeocode(location: startLocation) { placemark in
             if let address = placemark {
-                var components: [String] = []
-                if let locality = address.locality, !locality.isEmpty {
-                    components.append(locality)
+                if let city = address.locality, !city.isEmpty {
+                    startShortName.append(city)
                 }
-                if let subLocality = address.subLocality, !subLocality.isEmpty {
-                    components.append(subLocality)
+                if let district = address.subLocality, !district.isEmpty {
+                    startShortName.append(district)
                 }
-                if components.count == 1, let name = address.name, !name.isEmpty {
-                    components.append(name)
+                
+                if let addrName = address.areasOfInterest?.first ?? address.name {
+                    self.sessionRoute?.startName = startShortName + addrName
+                } else {
+                    self.sessionRoute?.startName = startShortName
                 }
-                startLocation = components.joined(separator: "")
             }
             group.leave()
         }
 
         // 终点逆地理编码
         group.enter()
-        let endCoordinate = CLLocation(latitude: endPoint.latitude, longitude: endPoint.longitude)
-        locationManager.reverseGeocode(location: endCoordinate) { placemark in
+        let endlocation = CLLocation(latitude: endPoint.latitude, longitude: endPoint.longitude)
+        locationManager.reverseGeocode(location: endlocation) { placemark in
             if let address = placemark {
-                var components: [String] = []
-                if let locality = address.locality, !locality.isEmpty {
-                    components.append(locality)
+                if let city = address.locality, !city.isEmpty {
+                    endShortName.append(city)
                 }
-                if let subLocality = address.subLocality, !subLocality.isEmpty {
-                    components.append(subLocality)
+                if let district = address.subLocality, !district.isEmpty {
+                    endShortName.append(district)
                 }
-                if components.count == 1, let name = address.name, !name.isEmpty {
-                    components.append(name)
+                if let addrName = address.areasOfInterest?.first ?? address.name {
+                    self.sessionRoute?.endName = endShortName + addrName
+                } else {
+                    self.sessionRoute?.endName = endShortName
                 }
-                endLocation = components.joined(separator: "")
             }
             group.leave()
         }
         
         group.notify(queue: DispatchQueue.main) {
             // 组装最终名称
-            let startPart = startLocation.isEmpty ? "起点" : startLocation
-            let endPart = endLocation.isEmpty ? "终点" : endLocation
-            let result = "\(startPart)至\(endPart) \(timeString)"
+            if startShortName.count > 0, endShortName.count > 0 {
+                self.sessionRoute?.routeName = "\(startShortName)至\(endShortName) \(timeString)"
+            } else {
+                self.sessionRoute?.routeName = timeString
+            }
             
-            completion(result)
-            
-            debugPrint("等待完成，结果: \(result), 起点: \(startLocation), 终点: \(endLocation)")
+            completion()
         }
     }
     
@@ -330,7 +356,7 @@ class RouteDataManager {
         let tempGPXURL = FileManager.default.temporaryDirectory.appendingPathComponent(route.id).appendingPathExtension(gpxExtension)
         let points = readPointsFromTxtFile(fileURL: sessionTxtFileURL())
         if generateGPXFile(from: points, targetURL: tempGPXURL, name: route.routeName) {
-            return try? Data(contentsOf: targetURL)
+            return try? Data(contentsOf: tempGPXURL)
         }
         return nil
     }
@@ -449,7 +475,7 @@ class RouteDataManager {
     }
     
     private func sessionTxtFileURL() -> URL? {
-        guard let routeId = sessionRouteId, !routeId.isEmpty else {
+        guard let routeId = sessionRoute?.id, !routeId.isEmpty else {
             return nil
         }
         
@@ -489,19 +515,21 @@ extension RouteDataManager {
     ///   - route: 路线记录
     ///   - fileUrl: 上传后的文件URL
     func saveRouteToService(_ route: Route, completion: ((Route?, String?) -> Void)?) {
-        guard let type = route.type else {
+        guard route.type != nil else {
             completion?(nil, nil)
             return
         }
         
-        uploadRouteToService(route) { [weak self] fileUrl in
+        var routeDict = route.toDictionary()
+        
+        uploadRouteToService(route) { [weak self] fileUrl, errorMsg in
             guard let fileUrl = fileUrl else {
-                completion?(nil, nil)
+                completion?(nil, errorMsg)
                 return
             }
-            let routeName = route.routeName ?? "未命名"
+            routeDict["fileUrl"] = fileUrl
             
-            self?.mapService.saveUserRoute(type: type, name: routeName, desc: route.description, fileUrl: fileUrl) { result in
+            self?.mapService.saveUserRoute(params: routeDict) { result in
                 switch result {
                 case .success(let response):
                     do {
@@ -530,8 +558,8 @@ extension RouteDataManager {
                 do {
                     let bizResponse = try JSONDecoder().decode(NetworkResponse<Bool>.self, from: response.data)
                     if bizResponse.data == true {
-                        self?.deleteRouteFromLocal(routeId)
                         completion?(true, nil)
+                        self?.deleteRouteFromLocal(routeId)
                     } else {
                         completion?(false, response.description)
                     }
@@ -544,8 +572,9 @@ extension RouteDataManager {
         }
     }
     
-    private func uploadRouteToService(_ route: Route, completion: ((String?) -> Void)?) {
+    private func uploadRouteToService(_ route: Route, completion: ((String?, String?) -> Void)?) {
         guard let fileData = getRouteGPXData(from: route) else {
+            completion?(nil, "生成数据失败")
             return
         }
         let routeName = route.routeName ?? "未命名"
@@ -557,12 +586,12 @@ extension RouteDataManager {
                 switch result {
                 case .success(let response):
                     if response.isSuccess, let fileUrl = response.data?.fileUrl {
-                        completion?(fileUrl)
+                        completion?(fileUrl, nil)
                     } else {
-                        completion?(nil)
+                        completion?(nil, response.msg)
                     }
-                case .failure(_):
-                    completion?(nil)
+                case .failure(let error):
+                    completion?(nil, error.localizedDescription)
                 }
             }
         }

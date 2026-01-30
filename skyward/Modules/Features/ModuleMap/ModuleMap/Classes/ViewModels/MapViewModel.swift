@@ -586,11 +586,6 @@ extension MapViewModel {
     
     func checkValidTrackName(_ name: String?, completion:((String?) ->Void)?) {
         guard let name = name?.trimmingCharacters(in: .whitespacesAndNewlines), !name.isEmpty else {
-            completion?("请输入轨迹名称")
-            return
-        }
-        if name.count > 30 {
-            completion?("最多输入30个字符")
             return
         }
         // 无网络没法敏感词校验
