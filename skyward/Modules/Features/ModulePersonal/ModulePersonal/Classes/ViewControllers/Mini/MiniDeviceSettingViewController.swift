@@ -41,7 +41,7 @@ class MiniDeviceSettingViewController: PersonalBaseViewController {
         button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle("解除绑定", for: .normal)
         button.setTitleColor(UIColor(hex: "#F7594B"), for: .normal)
-        button.backgroundColor = UIColor(hex: "#F2F3F4")
+        button.backgroundColor = ThemeManager.current.mediumGrayBGColor
         button.titleLabel?.font = .systemFont(ofSize: 16, weight: .medium)
         button.layer.masksToBounds = true
         button.layer.cornerRadius = 8
@@ -58,7 +58,7 @@ class MiniDeviceSettingViewController: PersonalBaseViewController {
     }
     
     private func setupUI() {
-        view.backgroundColor = UIColor(hex: "#FFFFFF")
+        view.backgroundColor = .white
         customTitle.text = "设置"
         
         view.addSubview(tableView)

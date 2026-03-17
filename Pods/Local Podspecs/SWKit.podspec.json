@@ -32,6 +32,7 @@
     "SWNetwork": [],
     "Moya": [],
     "SnapKit": [],
-    "WCDB.swift": []
+    "WCDB.swift": [],
+    "CocoaLumberjack": []
   }
 }

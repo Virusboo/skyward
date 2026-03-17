@@ -9,6 +9,7 @@
 import UIKit
 import CoreLocation
 import SWKit
+import SWTheme
 
 class POIWeatherDetailViewController: UIViewController {
     
@@ -18,6 +19,7 @@ class POIWeatherDetailViewController: UIViewController {
     var coordinate: CLLocationCoordinate2D
     var isPOI = true
     private var poiData: PublicPOIData?
+    private var pointData: MapSearchPointMsgData?
     private var weatherData: WeatherData?
     private var hoursData: [EveryHoursWeatherData]?
     private var daysData: [EveryDayWeatherData]?
@@ -39,7 +41,7 @@ class POIWeatherDetailViewController: UIViewController {
     private let headerView = UIView()
     private let locationLabel = UILabel()
     private let addressLabel = UILabel()
-    private let closeButton = UIButton(type: .system)
+    private let closeButton = UIButton(type: .custom)
     
     // MARK: - Initializer
     init(poiData: PublicPOIData) {
@@ -70,6 +72,8 @@ class POIWeatherDetailViewController: UIViewController {
         setupTableView()
         bindViewModel()
         
+        // 获取点位的名称和海拔
+        fetchPointData()
         // 获取天气数据
         fetchWeatherData()
         
@@ -112,7 +116,7 @@ class POIWeatherDetailViewController: UIViewController {
         }
         // 添加顶部边框
         let border = UIView()
-        border.backgroundColor = UIColor.systemGray5
+        border.backgroundColor = ThemeManager.current.mediumGrayBGColor
         bottomToolView.addSubview(border)
         border.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -178,7 +182,6 @@ class POIWeatherDetailViewController: UIViewController {
     // MARK: - 按钮点击处理
     private func handleCheckTapped() {
         print("打卡按钮点击")
-        // 实现打卡功能
     }
     
     private func handleCollectionTapped() {
@@ -193,8 +196,9 @@ class POIWeatherDetailViewController: UIViewController {
             guard let self = self else { return }
             let startLat = location?.coordinate.latitude ?? 0.0
             let startLon = location?.coordinate.latitude ?? 0.0
-            let endLat = self.coordinate.latitude
-            let endLon = self.coordinate.longitude
+            let coordinate = CoordinateTransform.wgs84ToGcj02(CLLocationCoordinate2D(latitude: self.coordinate.latitude, longitude: self.coordinate.longitude))
+            let endLat = coordinate.latitude
+            let endLon = coordinate.longitude
             mapViewModel.openAmapNavigation(startLat: startLat, startLon: startLon, endLat: endLat, endLon: endLon, destinationName: self.poiTitle ?? "")
         }
         
@@ -246,6 +250,15 @@ class POIWeatherDetailViewController: UIViewController {
                 self.tableView.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .none)
             }
             .store(in: &viewModel.cancellables)
+        
+        viewModel.$pointData
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] data in
+                guard let self = self else { return }
+                self.pointData = data
+                self.tableView.reloadData()
+            }
+            .store(in: &viewModel.cancellables)
     }
     
     // MARK: - Actions
@@ -254,6 +267,10 @@ class POIWeatherDetailViewController: UIViewController {
     }
     
     // MARK: - Data
+    private func fetchPointData() {
+        viewModel.input.pointDataRequest.send(coordinate)
+    }
+    
     private func fetchWeatherData() {
         viewModel.input.pointWeatherRequest.send(coordinate)
         viewModel.input.hoursWeatherRequest.send(coordinate)
@@ -359,8 +376,12 @@ extension POIWeatherDetailViewController: UITableViewDataSource, UITableViewDele
         if section == 0 {
             // 第一个section的header作为悬停头部
             let header = tableView.dequeueReusableHeaderFooterView(withIdentifier: "WeatherHeaderView") as! WeatherHeaderView
-            if let title = poiTitle, let address = address {
-                header.configure(title: title, subtitle: address)
+            header.configure(with: coordinate)
+            if let poiData = poiData {
+                header.configure(with: poiData)
+            }
+            if let pointData = pointData {
+                header.configure(with: pointData)
             }
             header.closeButton.addTarget(self, action: #selector(closeTapped), for: .touchUpInside)
             return header
@@ -370,7 +391,7 @@ extension POIWeatherDetailViewController: UITableViewDataSource, UITableViewDele
     
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         if section == 0 {
-            return 80 // 悬停头部的高度
+            return 120 // 悬停头部的高度
         }
         return 0
     }
@@ -423,6 +444,7 @@ class ForecastCell: UITableViewCell {
     }
     
     private func setupUI() {
+        backgroundColor = .white
         selectionStyle = .none
         
         contentView.addSubview(forecastView)

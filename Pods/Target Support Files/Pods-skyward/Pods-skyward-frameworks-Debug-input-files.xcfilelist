@@ -1,5 +1,6 @@
 ${PODS_ROOT}/Target Support Files/Pods-skyward/Pods-skyward-frameworks.sh
 ${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework
+${BUILT_PRODUCTS_DIR}/CocoaLumberjack/CocoaLumberjack.framework
 ${BUILT_PRODUCTS_DIR}/CocoaMQTT/CocoaMQTT.framework
 ${BUILT_PRODUCTS_DIR}/ModuleBootstrap/ModuleBootstrap.framework
 ${BUILT_PRODUCTS_DIR}/ModuleHome/ModuleHome.framework
@@ -11,7 +12,6 @@ ${BUILT_PRODUCTS_DIR}/ModuleTeam/ModuleTeam.framework
 ${BUILT_PRODUCTS_DIR}/Moya/Moya.framework
 ${BUILT_PRODUCTS_DIR}/MqttCocoaAsyncSocket/MqttCocoaAsyncSocket.framework
 ${BUILT_PRODUCTS_DIR}/SDWebImage/SDWebImage.framework
-${PODS_ROOT}/../skyward/Modules/Common/SWKit/SWKit/Frameworks/TangramMap.framework
 ${BUILT_PRODUCTS_DIR}/SWKit/SWKit.framework
 ${BUILT_PRODUCTS_DIR}/SWNetwork/SWNetwork.framework
 ${BUILT_PRODUCTS_DIR}/SWTheme/SWTheme.framework
@@ -22,3 +22,4 @@ ${BUILT_PRODUCTS_DIR}/TXRouterKit/TXRouterKit.framework
 ${BUILT_PRODUCTS_DIR}/WCDB.swift/WCDBSwift.framework
 ${BUILT_PRODUCTS_DIR}/WCDBOptimizedSQLCipher/sqlcipher.framework
 ${BUILT_PRODUCTS_DIR}/lottie-ios/Lottie.framework
+${PODS_XCFRAMEWORKS_BUILD_DIR}/SWKit/TangramMap.framework/TangramMap

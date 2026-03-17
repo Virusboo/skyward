@@ -29,7 +29,7 @@ class EmergencyContactPopupView: UIView,  SWAlertCustomView {
         textField.placeholder = "请输入紧急联系人昵称"
         textField.font = UIFont.systemFont(ofSize: 14)
         textField.textColor = UIColor(str: "#070808")
-        textField.backgroundColor = UIColor(str: "#F2F3F4")
+        textField.backgroundColor = ThemeManager.current.mediumGrayBGColor
         textField.layer.cornerRadius = 8
         textField.layer.masksToBounds = true
         textField.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 16, height: textField.frame.height))
@@ -61,7 +61,7 @@ class EmergencyContactPopupView: UIView,  SWAlertCustomView {
         textField.placeholder = "请输入紧急联系人电话"
         textField.font = UIFont.systemFont(ofSize: 14)
         textField.textColor = UIColor(str: "#070808")
-        textField.backgroundColor = UIColor(str: "#F2F3F4")
+        textField.backgroundColor = ThemeManager.current.mediumGrayBGColor
         textField.layer.cornerRadius = 8
         textField.layer.masksToBounds = true
         textField.keyboardType = .numberPad

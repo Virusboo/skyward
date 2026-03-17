@@ -62,5 +62,5 @@ struct FirmwareConstants {
     static let hardwareModelKey = "firmware_hardware_model"       // 硬件型号
     static let firmwareDirectory = "Firmware"                     // 固件存储目录
     static let defaultVersion = "1.0.0.0"                         // 默认版本
-    static let defaultHardwareModel = "4.0"                       // 默认硬件型号
+    static let defaultHardwareModel = "TX035"                       // 默认硬件型号
 }

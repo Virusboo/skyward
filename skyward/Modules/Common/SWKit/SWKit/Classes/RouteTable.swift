@@ -18,8 +18,14 @@ import Foundation
 public struct RouteTable {
     // 首页
     public static let homePageUrl = "sw://home/index"
+    public static let homeWeatherInfoUrl = "sw://home/weather/info"
     // 地图
     public static let mapPageUrl = "sw://map/index"
+    public static let routeListPageUrl = "sw://map/route/list"
+    public static let routeCountUrl = "sw://map/route/count"
+    public static let trackCountUrl = "sw://map/track/count"
+    public static let POIListUrl = "sw://map/POI/list"
+    public static let POICollectListUrl = "sw://map/POICollect/list"
     // 会话页
     public static let convPageUrl = "sw://message/conv"
     public static let startMonitorMessage = "sw://message/monitor/start"

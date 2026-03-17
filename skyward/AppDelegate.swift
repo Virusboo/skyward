@@ -18,6 +18,7 @@ import ModuleTeam
 import ModuleLogin
 import SWNetwork
 import Combine
+import Bugly
 
 @main
 
@@ -54,7 +55,9 @@ extension AppDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // 初始化日志管理器
-        Logger.registe(with: .other) //TODO:根据环境来配置
+        Logger.registe(with: .prod) //TODO:根据环境来配置
+        // bugly初始化
+        Bugly.start(withAppId: "ea0cccaf98")
         
         if UserManager.shared.isLogin {
             //初始化数据库
@@ -86,14 +89,23 @@ extension AppDelegate {
         }
 
         NetworkMonitor.shared.startMonitoring()
+        // 静默启动位置服务
+        LocationRegionManager.shared.startLocationService()
         // 初始化地图
         MapConfig.shared.resetToDefaults()
-        // 下载公共兴趣点
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-            POIDownloadManager.shared.startSilentDownload()
-        }
         // 判断pro的固件版本
         AppLaunchManager.shared.performLaunchTasks()
+        // 上传宽带存储的数据
+        DeviceDataCollectionScheduler.shared.checkAndUploadViaMQTT()
+        // 下载公共兴趣点
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+            POIDownloadManager.shared.startSilentDownload()
+        }
+        // 上传宽带存储的数据
+        DeviceDataCollectionScheduler.shared.checkAndUploadViaMQTT()
+        
+        UserDefaults.standard.set(["zh-Hans"], forKey: "AppleLanguages")
+        UserDefaults.standard.synchronize()
         
         DispatchQueue.main.async {
             let aWindow = UIWindow(frame: UIScreen.main.bounds)
@@ -111,6 +123,20 @@ extension AppDelegate {
         for service in _sortedServices {
             service.applicationDidBecomeActive(application)
         }
+        LocationRegionManager.shared.startLocationService()
+        WiFiDeviceManager.shared.checkWiFiPermission { wifiInfo in
+            if let wifiName = wifiInfo.ssid,
+               wifiName.contains("天行探索") {
+                WiFiDeviceManager.shared.connect()
+            }else {
+                WiFiDeviceManager.shared.disconnect()
+            }
+        }
+        NotificationCenter.default.post(name: .applicationDidBecomeActive, object: nil)
+
+        print("yifan-----APP进入活跃状态")
+        let connected = NetworkMonitor.shared.isConnected ? "有网络了，嘿嘿" : "还没有网络，恼火"
+        print("yifan-----\(connected)")
     }
     
     public func applicationWillResignActive(_ application: UIApplication) {
@@ -142,6 +168,7 @@ extension AppDelegate {
             service.application(application, performActionFor: shortcutItem, completionHandler: completionHandler)
         }
     }
+    
 }
 
 // MARK: - Hanlde URL

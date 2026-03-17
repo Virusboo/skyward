@@ -5,11 +5,11 @@
 //  Created by TXTS on 2025/11/18.
 //
 
-
 import UIKit
 import CoreBluetooth
 import SWKit
 import Combine
+import SWTheme
 
 public class MiniDeviceDetailViewController: PersonalBaseViewController {
     
@@ -34,7 +34,7 @@ public class MiniDeviceDetailViewController: PersonalBaseViewController {
     
     private lazy var miniTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
-        tableView.backgroundColor = UIColor(str: "#F2F3F4")
+        tableView.backgroundColor = ThemeManager.current.mediumGrayBGColor
         tableView.separatorStyle = .none
         tableView.delegate = self
         tableView.dataSource = self
@@ -58,7 +58,7 @@ public class MiniDeviceDetailViewController: PersonalBaseViewController {
     
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = UIColor(hex: "#F2F3F4")
+        view.backgroundColor = ThemeManager.current.mediumGrayBGColor
         customTitle.text = "详情"
         
         view.addSubview(miniTableView)
@@ -107,7 +107,7 @@ public class MiniDeviceDetailViewController: PersonalBaseViewController {
             let mcuSoftwareVersion = formatVersion(deviceInfo.mcuSoftwareVersion)
             miniVersion = String(mcuSoftwareVersion.dropFirst())
             print("Mini设备固件版本信息---\(miniVersion)")
-            let hardwareModel = "1.0"
+            let hardwareModel = formatHardware(deviceInfo.mcuHardwareVersion)
             let model = DeviceFirmwareModel(deviceType: 1, versionCode: miniVersion, hardwareModel: hardwareModel)
             self.checkNewVersion(model: model)
         }
@@ -268,15 +268,8 @@ public class MiniDeviceDetailViewController: PersonalBaseViewController {
     
     private func refreshMiniDeviceData() {
         BluetoothManager.shared.requestStatusInfo()
-        // 第二个延迟0.1秒
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            BluetoothManager.shared.requestDeviceInfo()
-        }
-        
-        // 第三个延迟0.2秒
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
-            BluetoothManager.shared.getSatelliteSignal()
-        }
+        BluetoothManager.shared.requestDeviceInfo()
+        BluetoothManager.shared.getSatelliteSignal()
     }
 }
 
@@ -303,6 +296,7 @@ extension MiniDeviceDetailViewController: BluetoothManagerDelegate {
         print("设备断开连接: \(peripheral.name ?? "未知设备")")
         DispatchQueue.main.async { [weak self] in
             self?.deviceConnetedStatus = 0
+            self?.newVersion = false
             self?.miniTableView.reloadData()
         }
     }

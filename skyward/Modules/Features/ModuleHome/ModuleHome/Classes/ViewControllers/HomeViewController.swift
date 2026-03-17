@@ -16,7 +16,7 @@ import SWNetwork
 
 public class HomeViewController: BaseViewController, MapViewDelegate, SOSButtonDelegate {
 
-    private var viewModel = HomeViewModel()
+    var viewModel = HomeViewModel()
     private let mapManager = MapManager()
     
     // MARK: - Override
@@ -51,7 +51,7 @@ public class HomeViewController: BaseViewController, MapViewDelegate, SOSButtonD
     
     public override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        mapManager.reloadMapWithCurrentTileSource()
+        mapManager.loadMapWithCurrentTileSource()
     }
     
     override public func setupViews() {
@@ -145,13 +145,20 @@ public class HomeViewController: BaseViewController, MapViewDelegate, SOSButtonD
             self?.tableView.reloadData()
         }
         // 天气
-        bindPublisher(viewModel.$weatherInfo.eraseToAnyPublisher()) { [weak self] _ in
-            if let text = self?.viewModel.weatherInfo?.text,
-               let temp = self?.viewModel.weatherInfo?.temp,
-               let icon = self?.viewModel.weatherInfo?.icon {
+        bindPublisher(viewModel.$weatherInfo.eraseToAnyPublisher()) { [weak self] weatherInfo in
+            if let weatherInfo = weatherInfo {
                 self?.mapContianerView.weatherInfoView.isHidden = false
-                self?.mapContianerView.setWeatherText(text + temp + "℃")
-                self?.mapContianerView.setWeatherIcon(SWKitModule.image(named: icon))
+                
+                if let icon = weatherInfo.icon {
+                    self?.mapContianerView.setWeatherIcon(SWKitModule.image(named: icon))
+                }
+                
+                let district = weatherInfo.district ?? "--"
+                let text = weatherInfo.text ?? "--"
+                let temp = weatherInfo.temp ?? "--"
+                self?.mapContianerView.setWeatherText(district + " " + text + " " + temp + "℃")
+            } else {
+                self?.mapContianerView.weatherInfoView.isHidden = true
             }
         }
         // 窄带卡片信息
@@ -437,9 +444,9 @@ public class HomeViewController: BaseViewController, MapViewDelegate, SOSButtonD
     
     @objc private func showSatelliteInfo(_ notification: Notification) {
         guard let userInfo = notification.userInfo else { return }
-        if let satelliteInfo = userInfo["satelliteInfo"] as? String {
+        if let satelliteInfo = userInfo["satelliteInfo"] as? String, let level = Int(satelliteInfo) {
             print("Mini设备卫星状态--首页--\(satelliteInfo)")
-            self.miniDeviceCardView.satelliteIcon = HomeModule.image(named: "device_mini_line_satellite\(Int(satelliteInfo))")
+            self.miniDeviceCardView.satelliteIcon = HomeModule.image(named: "device_mini_line_satellite\(level))")
         }
     }
     
@@ -462,6 +469,9 @@ public class HomeViewController: BaseViewController, MapViewDelegate, SOSButtonD
                          if networkResponse.isSuccess {
                              UserDefaults.standard.removeObject(forKey: "EmergencyName")
                              UserDefaults.standard.removeObject(forKey: "EmergencyPhone")
+                             UserManager.shared.requestEmergencyContactList { result in
+                                 
+                             }
                          }
                      } catch {
                          

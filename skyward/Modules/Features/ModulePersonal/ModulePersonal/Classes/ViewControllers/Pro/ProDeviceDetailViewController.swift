@@ -8,6 +8,7 @@
 import UIKit
 import SWKit
 import ModuleLogin
+import SWTheme
 
 class ProDeviceDetailViewController: PersonalBaseViewController {
     
@@ -15,6 +16,11 @@ class ProDeviceDetailViewController: PersonalBaseViewController {
     private let wifiDeviceManager = WiFiDeviceManager.shared
     private var deviceStatus: ProDeviceStatus?
     private var environmentInfo: EnvironmentInfo?
+    private var satelliteLinkStatus: SatelliteLinkStatus?
+    private var rxSnr: Int?
+    private var txSnr: Int?
+    private var upText: String?
+    private var downText: String?
     private var statusUpdateTimer: Timer?
     
     private let viewModel = PersonalViewModel()
@@ -26,7 +32,7 @@ class ProDeviceDetailViewController: PersonalBaseViewController {
     
     private lazy var proTableView: UITableView = {
         let tableView = UITableView(frame: .zero, style: .plain)
-        tableView.backgroundColor = UIColor(str: "#F2F3F4")
+        tableView.backgroundColor = ThemeManager.current.mediumGrayBGColor
         tableView.separatorStyle = .none
         tableView.delegate = self
         tableView.dataSource = self
@@ -34,12 +40,12 @@ class ProDeviceDetailViewController: PersonalBaseViewController {
         
         tableView.register(ProDeviceBaseMsgCell.self, forCellReuseIdentifier: "ProDeviceBaseMsgCell")
         tableView.register(ProDeviceStatusCell.self, forCellReuseIdentifier: "ProDeviceStatusCell")
-        tableView.register(ProDeviceEveromentCell.self, forCellReuseIdentifier: "ProDeviceEveromentCell")
-        tableView.register(ProDeviceLowPowerCell.self, forCellReuseIdentifier: "ProDeviceLowPowerCell")
         tableView.register(ProDeviceSettingCell.self, forCellReuseIdentifier: "ProDeviceSettingCell")
         
         return tableView
     }()
+    
+    private let baseControlView = ProDeviceBaseControlView()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -47,6 +53,10 @@ class ProDeviceDetailViewController: PersonalBaseViewController {
         
         setupUI()
         setupWiFiDeviceManager()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         startStatusUpdates()
     }
     
@@ -65,18 +75,33 @@ class ProDeviceDetailViewController: PersonalBaseViewController {
     
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = UIColor(hex: "#F2F3F4")
+        view.backgroundColor = ThemeManager.current.mediumGrayBGColor
         customTitle.text = "详情"
         
         view.addSubview(proTableView)
+        baseControlView.translatesAutoresizingMaskIntoConstraints = false
+        baseControlView.collectionAction = { [weak self] in
+            guard let self = self else {return}
+            self.performAutoOff()
+            
+        }
+        baseControlView.lineStarAction = { [weak self] in
+            guard let self = self else {return}
+            self.performAutoSatellite()
+        }
+        view.addSubview(baseControlView)
         
         NSLayoutConstraint.activate([
             
             proTableView.topAnchor.constraint(equalTo: customNavView.bottomAnchor),
             proTableView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             proTableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            proTableView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            proTableView.bottomAnchor.constraint(equalTo: baseControlView.topAnchor),
             
+            baseControlView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            baseControlView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            baseControlView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            baseControlView.heightAnchor.constraint(equalToConstant: 100),
         ])
     }
     
@@ -119,6 +144,9 @@ class ProDeviceDetailViewController: PersonalBaseViewController {
         if wifiDeviceManager.isConnected {
             statusUpdateTimer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { [weak self] _ in
                 self?.updateDeviceStatus()
+                self?.updateEnvironmentInfo()
+                self?.updateProNetworkStatus()
+                self?.updateProNetworkSpeed()
             }
         }else {
             connectToWiFiDevice()
@@ -155,13 +183,95 @@ class ProDeviceDetailViewController: PersonalBaseViewController {
             case .success(let envInfo):
                 DispatchQueue.main.async {
                     self?.environmentInfo = envInfo
-                    self?.proTableView.reloadRows(at: [IndexPath(row: 2, section: 0)], with: .none)
+                    self?.proTableView.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .none)
                 }
             case .failure(let error):
                 print("环境信息更新失败: \(error)")
             }
         }
     }
+    
+    private func updateProNetworkStatus() {
+        guard let url = URL(string: "http://192.168.0.8/action/homestatus") else {
+            print("无效的URL")
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("请求错误: \(error)")
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                print("服务器返回错误")
+                return
+            }
+            
+            if let data = data {
+                do {
+                    let homeStatus = try JSONDecoder().decode(HomeStatusData.self, from: data)
+                    DispatchQueue.main.async {
+                        self.satelliteLinkStatus = homeStatus.satelliteLinkStatus
+                        self.rxSnr = homeStatus.rf_rx_snr
+                        self.txSnr = homeStatus.rf_tx_snr
+                        self.proTableView.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .none)
+                    }
+                } catch {
+                    print("JSON解析错误: \(error)")
+                }
+            }
+        }
+        
+        task.resume()
+    }
+    
+    private func updateProNetworkSpeed() {
+        guard let url = URL(string: "http://192.168.0.8/action/sysTrafficGet") else {
+            print("无效的URL")
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                print("请求错误: \(error)")
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse,
+                  (200...299).contains(httpResponse.statusCode) else {
+                print("服务器返回错误")
+                return
+            }
+            
+            if let data = data {
+                do {
+                    let response = try JSONDecoder().decode(SysTrafficResponse.self, from: data)
+                    // 检查返回码
+                    guard response.code == "0" else {
+                        print("返回的数据不可以使用")
+                        return
+                    }
+                    print("解析成功:")
+                    let receiveFormatted = FormattedBandwidth.format(bytes: response.receiveBandwidth).displayString
+                    let transmitFormatted = FormattedBandwidth.format(bytes: response.transmitBandwidth).displayString
+                    print("receiveFormatted: \(receiveFormatted)")
+                    print("transmitFormatted: \(transmitFormatted)")
+                    DispatchQueue.main.async {
+                        self.upText = receiveFormatted
+                        self.downText = transmitFormatted
+                        self.proTableView.reloadRows(at: [IndexPath(row: 0, section: 0)], with: .none)
+                    }
+                } catch {
+                    print("JSON解析错误: \(error)")
+                }
+            }
+        }
+        
+        task.resume()
+    }
+    
     
     private func updateConnectionStatus(_ isConnected: Bool) {
         if isConnected {
@@ -210,13 +320,8 @@ class ProDeviceDetailViewController: PersonalBaseViewController {
                 case .success(let success):
                     let message = success ? "一键收藏成功" : "一键收藏失败"
                     self?.view.sw_showSuccessToast(message)
-                    self?.collectingSuccess = success
                 case .failure(let error):
                     self?.view.sw_showWarningToast("收藏失败: \(error.localizedDescription)")
-                    // 通知Cell更新按钮状态
-                    if let cell = self?.proTableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? ProDeviceBaseMsgCell {
-                        cell.stopCollecting(with: false)
-                    }
                 }
                 
                 
@@ -282,14 +387,8 @@ class ProDeviceDetailViewController: PersonalBaseViewController {
                         mode: 1
                     )
                     self.proTableView.reloadRows(at: [IndexPath(row: 1, section: 0)], with: .none)
-                    if let cell = self.proTableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? ProDeviceBaseMsgCell {
-                        cell.stopLiningStar(with: true)
-                    }
                 case .failure(let error):
                     self.view.sw_showWarningToast("对星失败: \(error.localizedDescription)")
-                    if let cell = self.proTableView.cellForRow(at: IndexPath(row: 0, section: 0)) as? ProDeviceBaseMsgCell {
-                        cell.stopLiningStar(with: false)
-                    }
                 }
             }
         }
@@ -345,7 +444,7 @@ class ProDeviceDetailViewController: PersonalBaseViewController {
 
 extension ProDeviceDetailViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        5
+        3
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -353,28 +452,27 @@ extension ProDeviceDetailViewController: UITableViewDelegate, UITableViewDataSou
         case 0:
             let cell = tableView.dequeueReusableCell(withIdentifier: "ProDeviceBaseMsgCell") as! ProDeviceBaseMsgCell
             cell.changeStatus(isConnect: connect)
-            cell.stopCollecting(with: collectingSuccess)
-            if let deviceStatus = deviceStatus {
-                cell.updateModeChooseAndCollecitonUI(with: deviceStatus)
-            }
-            cell.collectionAction = { [weak self] in
-                guard let self = self else {return}
-                self.performAutoOff()
-            }
-            cell.lineStarAction = { [weak self] in
-                guard let self = self else {return}
-                self.performAutoSatellite()
-            }
             cell.quintupleTapAction = { [weak self] in
                 guard let self = self else {return}
                 self.pushToDebugVC()
             }
-            
+            if let upText = upText, let downText = downText {
+                cell.updateNetworkSpeed(upText: upText, downText: downText)
+            }
+            if let rxSnr = rxSnr, let txSnr = txSnr {
+                cell.updateNetworkSNR(rxSnr: rxSnr, txSnr: txSnr)
+            }
             return cell
         case 1:
             let cell = tableView.dequeueReusableCell(withIdentifier: "ProDeviceStatusCell") as! ProDeviceStatusCell
             if let deviceStatus = deviceStatus {
                 cell.configon(with: deviceStatus)
+            }
+            if let environmentInfo = environmentInfo {
+                cell.configonEnvironment(with: environmentInfo)
+            }
+            if let satelliteLinkStatus = satelliteLinkStatus {
+                cell.configRunStatus(with: satelliteLinkStatus)
             }
             cell.refreshAction = { [weak self] in
                 guard let self = self else { return }
@@ -382,20 +480,6 @@ extension ProDeviceDetailViewController: UITableViewDelegate, UITableViewDataSou
             }
             return cell
         case 2:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "ProDeviceEveromentCell") as! ProDeviceEveromentCell
-            if let environmentInfo = environmentInfo {
-                cell.configon(with: environmentInfo)
-            }
-            cell.refreshAction = { [weak self] in
-                guard let self = self else { return }
-                self.updateEnvironmentInfo()
-            }
-            return cell
-        case 3:
-            let cell = tableView.dequeueReusableCell(withIdentifier: "ProDeviceLowPowerCell") as! ProDeviceLowPowerCell
-            
-            return cell
-        case 4:
             let cell = tableView.dequeueReusableCell(withIdentifier: "ProDeviceSettingCell") as! ProDeviceSettingCell
             cell.selectedCallback = { [weak self] index in
                 guard let self = self else {return}
@@ -434,12 +518,8 @@ extension ProDeviceDetailViewController: UITableViewDelegate, UITableViewDataSou
         case 0:
             return 200
         case 1:
-            return 240
+            return 260
         case 2:
-            return 120
-        case 3:
-            return 60
-        case 4:
             return 220
         default:
             return 200
@@ -450,6 +530,7 @@ extension ProDeviceDetailViewController: UITableViewDelegate, UITableViewDataSou
 extension ProDeviceDetailViewController {
     
     private func pushToAlarmVC() {
+        stopStatusUpdates()
         let vc = ProDeviceAlarmViewController()
         self.navigationController?.pushViewController(vc, animated: true)
     }

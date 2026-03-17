@@ -12,7 +12,7 @@ import SWNetwork
 
 public enum UserAPI {
     case getUserInfo
-    case getEmergencyContact
+    case getEmergencyContactList
     case bindEmergencyContact(name: String, phone: String)
     case bindMiniDevice(userId: String, serialNum: String, macAddress: String)
 }
@@ -36,8 +36,8 @@ extension UserAPI: NetworkAPI {
         switch self {
         case .getUserInfo:
             return "/txts-user-center-app/api/v1/user/app-user/info"
-        case .getEmergencyContact:
-            return "/txts-user-center-app/api/v1/emergency-contact/info"
+        case .getEmergencyContactList:
+            return "/txts-user-center-app/api/v1/emergency-contact/list"
         case .bindEmergencyContact:
             return "/txts-user-center-app/api/v1/emergency-contact"
         case .bindMiniDevice:
@@ -47,7 +47,7 @@ extension UserAPI: NetworkAPI {
     
     public var method: Moya.Method {
         switch self {
-        case .getUserInfo, .getEmergencyContact:
+        case .getUserInfo, .getEmergencyContactList:
             return .get
         case .bindEmergencyContact, .bindMiniDevice:
             return .post
@@ -56,7 +56,7 @@ extension UserAPI: NetworkAPI {
     
     public var task: Moya.Task {
         switch self {
-        case .getUserInfo, .getEmergencyContact:
+        case .getUserInfo, .getEmergencyContactList:
             return .requestPlain
         case .bindEmergencyContact(let name, let phone):
             return .requestParameters(parameters: ["name": name, "phone": phone], encoding: JSONEncoding.default)

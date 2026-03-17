@@ -1,5 +1,11 @@
 PODS:
   - Alamofire (5.10.2)
+  - Bugly (2.6.1)
+  - CocoaLumberjack (3.9.0):
+    - CocoaLumberjack/Core (= 3.9.0)
+  - CocoaLumberjack/Core (3.9.0)
+  - CocoaLumberjack/Swift (3.9.0):
+    - CocoaLumberjack/Core
   - CocoaMQTT (2.1.6):
     - CocoaMQTT/Core (= 2.1.6)
   - CocoaMQTT/Core (2.1.6):
@@ -81,6 +87,7 @@ PODS:
   - SDWebImage/Core (5.21.5)
   - SnapKit (5.7.1)
   - SWKit (0.1.0):
+    - CocoaLumberjack
     - Moya
     - SnapKit
     - SWNetwork
@@ -102,6 +109,8 @@ PODS:
   - WCDBOptimizedSQLCipher (1.4.8)
 
 DEPENDENCIES:
+  - Bugly
+  - CocoaLumberjack/Swift
   - CocoaMQTT
   - lottie-ios
   - ModuleBootstrap (from `./skyward/Modules/Features/ModuleBootstrap`)
@@ -125,6 +134,8 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - Alamofire
+    - Bugly
+    - CocoaLumberjack
     - CocoaMQTT
     - lottie-ios
     - Moya
@@ -164,6 +175,8 @@ EXTERNAL SOURCES:
 
 SPEC CHECKSUMS:
   Alamofire: 7193b3b92c74a07f85569e1a6c4f4237291e7496
+  Bugly: 217ac2ce5f0f2626d43dbaa4f70764c953a26a31
+  CocoaLumberjack: 5644158777912b7de7469fa881f8a3f259c2512a
   CocoaMQTT: 1f206228b29318eabdacad0c2e4e88575922c27a
   lottie-ios: 96784afc26ea031d3e2b6cae342a4b8915072489
   ModuleBootstrap: 845c31e2491e692d78bc50324c71f64af098ebf5
@@ -177,7 +190,7 @@ SPEC CHECKSUMS:
   MqttCocoaAsyncSocket: 77d3b74f76228dd5a05d1f9526eab101d415b30c
   SDWebImage: e9c98383c7572d713c1a0d7dd2783b10599b9838
   SnapKit: d612e99e678a2d3b95bf60b0705ed0a35c03484a
-  SWKit: e97a99087c031d50598f102e75f293a23a4e7b4e
+  SWKit: 091bf39c1bf7ff5244f1c9f1aedc42871553d613
   SWNetwork: da7cf1b30c82c2a5caca9d8874f8da70337654b1
   SWTheme: fef9e4b842b3b6de90e358a93aaa416ac7ea96e3
   TXCacheKit: 943025578393e60e4e4dde7ce93de9dc17e1f171
@@ -186,6 +199,6 @@ SPEC CHECKSUMS:
   WCDB.swift: cc8c9ba279270f8609f87bb2245435e958354558
   WCDBOptimizedSQLCipher: 871994f7f620302fdf87a2729c099a1efa2223da
 
-PODFILE CHECKSUM: 37c5d8caf91d5852fc3b46b4bd1e1f119c74718c
+PODFILE CHECKSUM: 1030ab0d8e73f74895876e04b90973ca788303fd
 
 COCOAPODS: 1.16.2

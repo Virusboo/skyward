@@ -29,9 +29,9 @@ public class UserManager {
     
     public var userInfo: UserInfo?
     
-    public var emergencyContact: EmergencyContact? {
+    public var emergencyContact: [EmergencyContact]? {
         didSet {
-            if emergencyContact != nil {
+            if emergencyContact?.count != 0 {
                 self.userInfo?.isSetEmergency = true
             }
         }
@@ -72,11 +72,11 @@ public class UserManager {
     }
     
     /// 获取紧急联系人信息
-    public func getEmergencyContact(_ completion: @escaping (EmergencyContact?) -> Void) {
+    public func getEmergencyContactList(_ completion: @escaping ([EmergencyContact]?) -> Void) {
         if let emergencyContact = emergencyContact {
             completion(emergencyContact)
         } else {
-            requestEmergencyContact(completion)
+            requestEmergencyContactList(completion)
         }
     }
     /// 绑定紧急联系人信息
@@ -87,7 +87,7 @@ public class UserManager {
                 do {
                     let networkResponse = try rsp.map(NetworkResponse<Bool>.self)
                     if networkResponse.isSuccess {
-                        self.requestEmergencyContact { contact in
+                        self.requestEmergencyContactList { contact in
                             completion( contact != nil)
                         }
                     } else {
@@ -105,13 +105,14 @@ public class UserManager {
     }
 
     /// 请求紧急联系人信息
-    func requestEmergencyContact(_ completion: @escaping (EmergencyContact?) -> Void) { 
-        NetworkProvider<UserAPI>().request(.getEmergencyContact) { result in
+    public func requestEmergencyContactList(_ completion: @escaping ([EmergencyContact]?) -> Void) {
+        NetworkProvider<UserAPI>().request(.getEmergencyContactList) { result in
             switch result {
             case .success(let rsp):
                 do {
-                    let networkResponse = try rsp.map(NetworkResponse<EmergencyContact>.self)
+                    let networkResponse = try rsp.map(NetworkResponse<[EmergencyContact]>.self)
                     self.emergencyContact = networkResponse.data
+                    self.userInfo?.isSetEmergency = true
                     completion(self.emergencyContact)
                 } catch {
                     completion(nil)
@@ -146,8 +147,16 @@ public class UserManager {
     }
     
     /// 清空用户信息
-    private func cleanUserInfo() {
+    public func cleanUserInfo() {
         UserDefaults.standard.removeObject(forKey: storageUserId())
+        userInfo = nil
+        emergencyContact = nil
+        TokenManager.shared.clearTokens()
+    }
+    
+    public func cleanEmergencyContact() {
+        userInfo?.isSetEmergency = false
+        emergencyContact = nil
     }
     
     /// 保存用户信息

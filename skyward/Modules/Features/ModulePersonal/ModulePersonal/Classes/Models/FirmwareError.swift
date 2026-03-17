@@ -55,7 +55,7 @@ extension PersonalError {
         case .parseError(let message):
             return .apiError(code: "PARSE_ERROR", message: message)
         case .businessError(let message, let code):
-            return .apiError(code: code ?? "BUSINESS_ERROR", message: message ?? "业务错误")
+            return .apiError(code: code, message: message)
         }
     }
 }

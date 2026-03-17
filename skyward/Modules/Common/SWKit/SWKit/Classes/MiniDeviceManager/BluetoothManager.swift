@@ -57,7 +57,6 @@ public class BluetoothManager: NSObject {
     override init() {
         super.init()
         centralManager = CBCentralManager(delegate: self, queue: DispatchQueue.main)
-        DBManager.shared.createTable(table: DBTableName.miniDevice.rawValue, of: MiniDeviceData.self)
     }
     
     public var isConnected: Bool {
@@ -204,8 +203,8 @@ extension BluetoothManager: CBCentralManagerDelegate {
         // 保存设备信息到本地
         for scannedDevice in scannedDevices.values {
             if scannedDevice.peripheral == peripheral {
-                let lastFourDigits = String(scannedDevice.imei.suffix(4))
-                let name = "行者nimi_\(lastFourDigits)"
+                let lastFourDigits = String(scannedDevice.imei.suffix(5))
+                let name = "行者mini_\(lastFourDigits)"
                 let deviceData = MiniDeviceData(name: name, serialNum: scannedDevice.imei, imeiNum: scannedDevice.imei, forthGenCardNum: "", typeCode: "NARROW_BAND", state: 0, macAddress: scannedDevice.macAddress, model: "TXTS-NB-01")
                 // 保存设备信息到本地
                 MiniDeviceDBManager.shared.insertFromMiniDeviceList([deviceData])
@@ -224,17 +223,8 @@ extension BluetoothManager: CBCentralManagerDelegate {
             guard let self = self else { return }
             print("连接稳定，请求设备状态信息")
             self.requestStatusInfo()
-            // 第二个延迟0.1秒
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                guard let self = self else { return }
-                self.requestDeviceInfo()
-            }
-            
-            // 第三个延迟0.2秒
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) { [weak self] in
-                guard let self = self else { return }
-                self.getSatelliteSignal()
-            }
+            self.requestDeviceInfo()
+            self.getSatelliteSignal()
         }
     }
     
@@ -254,6 +244,7 @@ extension BluetoothManager: CBCentralManagerDelegate {
 
 // MARK: - CBPeripheralDelegate
 extension BluetoothManager: CBPeripheralDelegate {
+    
     public func peripheral(_ peripheral: CBPeripheral, didDiscoverServices error: Error?) {
         if let error = error {
             print("发现服务错误: \(error.localizedDescription)")

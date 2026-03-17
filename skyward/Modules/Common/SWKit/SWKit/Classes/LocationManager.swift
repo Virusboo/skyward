@@ -152,7 +152,7 @@ public class LocationManager: NSObject {
     ///   - location: 要转换的坐标位置
     ///   - timeout: 超时时间（秒），默认 2 秒
     ///   - completion: 完成回调，返回 CLPlacemark（包含地址信息）
-    public func reverseGeocode(location: CLLocation, timeout: TimeInterval = 2.0, completion: @escaping (CLPlacemark?) -> Void) {
+    public static func reverseGeocode(location: CLLocation, timeout: TimeInterval = 2.0, completion: @escaping (CLPlacemark?) -> Void) {
         // 为每个请求创建独立的 geocoder 实例，避免并发请求相互取消
         let independentGeocoder = CLGeocoder()
         var hasCompleted = false
@@ -236,7 +236,7 @@ extension LocationManager: CLLocationManagerDelegate {
         lastHeadingUpdateTime = now
         
         // 获取磁北方向
-        let magneticHeading = newHeading.magneticHeading
+        let magneticHeading = newHeading.trueHeading
         
         // 通知方向更新
         onHeadingUpdate?(magneticHeading)

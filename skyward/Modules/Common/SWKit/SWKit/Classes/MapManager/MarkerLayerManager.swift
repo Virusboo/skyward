@@ -36,10 +36,10 @@ public struct PointMarkerStyle: MarkerStyle {
     public var icon: UIImage?
 
     public init(color: String = "white",
-                size: [CGFloat] = [24, 32],
+                size: [CGFloat] = [30, 30],
                 interactive: Bool = true,
                 order: Int = 500,
-                collide: Bool = false,
+                collide: Bool = true,
                 icon: UIImage? = nil) {
         self.color = color
         self.size = size
@@ -72,36 +72,33 @@ public struct PointMarkerStyle: MarkerStyle {
     }
     
     public var selectedYamlString: String {
-        return """
-        { style: 'points',
-          interactive: \(interactive),
-          color: '\(color)',
-          size: [\(size[0] + 5)px, \(size[1] + 5)px],
-          order: \(order),
-          collide: \(collide) }
-        """
+        return yamlString
     }
 
     // 预设样式
     public static let `default` = PointMarkerStyle()
-    public static let selected = PointMarkerStyle(size: [32, 40], order: 1000)
+    public static let selected = PointMarkerStyle(size: [45, 45], order: 1000)
     public static let hidden = PointMarkerStyle(color: "transparent", size: [0, 0], interactive: true, order: 0)
 
     // 按图层ID预设样式
     public static func style(for layerId: String) -> PointMarkerStyle {
         switch layerId {
         case "campsite":
-            return PointMarkerStyle(size: [24, 32], order: 600)
+            return PointMarkerStyle(size: [30, 30], order: 401)
         case "scenicSpots":
-            return PointMarkerStyle(size: [24, 32], order: 500)
+            return PointMarkerStyle(size: [30, 30], order: 402)
         case "gasStation":
-            return PointMarkerStyle(size: [24, 32], order: 400)
+            return PointMarkerStyle(size: [30, 30], order: 403)
+        case "medical":
+            return PointMarkerStyle(size: [30, 30], order: 404)
         case "custom", "newCustom":
-            return PointMarkerStyle(size: [24, 32], order: 700)
-        case "memberLocation", "safe", "sos", "weather":
+            return PointMarkerStyle(size: [30, 30], order: 700)
+        case "memberLocation", "safe", "sos":
             return PointMarkerStyle(size: [32, 32], order: 701)
-        case "myRoutesNode":
-            return PointMarkerStyle(size: [8, 8], order: 501)
+        case "route_node":
+            return PointMarkerStyle(size: [12, 12], order: 501)
+        case "track_start", "track_end":
+            return PointMarkerStyle(size: [16, 16], order: 501)
         default:
             return PointMarkerStyle.default
         }
@@ -116,18 +113,22 @@ public struct PointMarkerStyle: MarkerStyle {
             return SWKitModule.image(named: "map_poi_2")
         case "gasStation":
             return SWKitModule.image(named: "map_poi_3")
+        case "medical":
+            return SWKitModule.image(named: "map_poi_4")
         case "memberLocation":
             return SWKitModule.image(named: "team_location_member")
         case "safe":
             return SWKitModule.image(named: "team_location_safe")
         case "sos":
             return SWKitModule.image(named: "team_location_sos")
-        case "weather":
-            return SWKitModule.image(named: "measure_start2")
-        case "myRoutesNode":
+        case "route_node":
             return SWKitModule.image(named: "map_node")
+        case "track_start":
+            return SWKitModule.image(named: "map_track_start")
+        case "track_end":
+            return SWKitModule.image(named: "map_track_end")
         default:
-            return SWKitModule.image(named: "map_poi_4")
+            return SWKitModule.image(named: "map_poi_custom")
         }
     }
 }
@@ -146,12 +147,12 @@ public struct LineMarkerStyle: MarkerStyle {
     public var outlineColor: String
 
     public init(color: String = "#FE6A00",
-                width: CGFloat = 2,
+                width: CGFloat = 4,
                 interactive: Bool = true,
                 order: Int = 500,
                 opacity: CGFloat = 0.5,
-                outlineWidth: CGFloat = 10,
-                outlineColor: String = "rgba(255,255,255,0.01)") {
+                outlineWidth: CGFloat = 1,
+                outlineColor: String = "rgba(255,255,255,1)") {
         self.color = color
         self.width = width
         self.interactive = interactive
@@ -163,7 +164,7 @@ public struct LineMarkerStyle: MarkerStyle {
 
     public var yamlString: String {
         return """
-        { style: 'unlit-lines',
+        { style: 'lines',
           interactive: \(interactive),
           color: '\(color)',
           width: \(width)px,
@@ -189,17 +190,7 @@ public struct LineMarkerStyle: MarkerStyle {
     }
 
     public var selectedYamlString: String {
-        return """
-        { style: 'lines',
-          interactive: \(interactive),
-          color: '\(color)',
-          width: \(width + 4)px,
-          order: \(order),
-          cap: 'round',
-          join: 'round',
-          opacity: \(opacity),
-          outline: { width: \(outlineWidth + 4)px, color: '\(outlineColor)', interactive: true} }
-        """
+        return yamlString
     }
 
     // 预设样式
@@ -422,7 +413,7 @@ public class MarkerLayerManager: NSObject {
         onLayerChanged?(layerId, layer.markerCount)
     }
     
-    func removeAllMarkers(in layerId: String) {
+    public func removeAllMarkers(in layerId: String) {
         guard let layer = layers[layerId] else { return }
         
         for (markerId, marker) in layer.markers {
@@ -516,14 +507,8 @@ public class MarkerLayerManager: NSObject {
         }
         
         // 应用选中样式
-        switch data.type {
-        case .point:
-            marker.stylingString = PointMarkerStyle.selected.yamlString
-            marker.drawOrder = PointMarkerStyle.selected.order
-        case .line:
-            if let style = layer.styles[markerId] {
-                marker.stylingString = style.selectedYamlString
-            }
+        if let style = layer.styles[markerId] {
+            marker.stylingString = style.selectedYamlString
         }
 
         selectedMarkerId = markerId
@@ -575,7 +560,7 @@ public class MarkerLayerManager: NSObject {
     
     // MARK: - 可见性控制
     
-    func setMarkerVisible(_ visible: Bool, markerId: String, in layerId: String) {
+    public func setMarkerVisible(_ visible: Bool, markerId: String, in layerId: String) {
         guard let layer = layers[layerId],
               let marker = layer.markers[markerId] else { return }
         

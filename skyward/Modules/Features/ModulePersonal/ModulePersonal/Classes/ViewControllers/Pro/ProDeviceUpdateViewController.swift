@@ -153,6 +153,7 @@ class ProDeviceUpdateViewController: PersonalBaseViewController {
                     self.firmwareVersionLabel.text = "当前版本：固件_\(self.currentVersion)"
                 }
                 let savedVersion = firmwareManager.getCurrentStoredVersion()
+                
                 switch currentVersion.compareVersion(savedVersion) {
                 case .orderedAscending:
                     print("\(currentVersion) < \(savedVersion)")

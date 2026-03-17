@@ -269,11 +269,11 @@ public class ScannedDevice {
     
     public var name: String {
         // 确保 imei 至少有 4 位
-        guard imei.count >= 4 else { return "行者nimi_未知" }
+        guard imei.count >= 5 else { return "行者mini_未知" }
         
         // 获取 imei 的最后 4 位
-        let lastFourDigits = String(imei.suffix(4))
-        return "行者nimi_\(lastFourDigits)"
+        let lastFourDigits = String(imei.suffix(5))
+        return "行者mini_\(lastFourDigits)"
     }
 }
 

@@ -23,8 +23,6 @@ public struct EmergencyContact: Codable {
     public let name: String?
     public let phone: String?
     public let userId: String?
-    public let isNoticeInsurance: Int?
-    public let insuranceCode: String?
-    public let isNoticeLtRescueTeam: Int?
+    public let relationship: Int?
 }
 

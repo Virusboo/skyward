@@ -16,16 +16,17 @@ public class MapService {
     private let provider: NetworkProvider<MapAPI>
     
     public init() {
+        // 使用默认插件，包含日志插件、缓存插件等
         self.provider = NetworkProvider<MapAPI>()
     }
     
     // MARK: - 获取路线列表
     @available(iOS 13.0, *)
-    public func getRouteList(_ model: RouteListModel) async throws -> Response {
+    public func getRouteList(_ model: RouteListReq) async throws -> Response {
         return try await provider.request(.getRouteList(model))
     }
     
-    public func getRouteList(_ model: RouteListModel, completion: @escaping (Result<Response, MoyaError>) -> Void) {
+    public func getRouteList(_ model: RouteListReq, completion: @escaping (Result<Response, MoyaError>) -> Void) {
         provider.request(.getRouteList(model), completion: completion)
     }
     
@@ -47,6 +48,15 @@ public class MapService {
     
     public func deleteRoute(_ routeId: String, completion: @escaping (Result<Response, MoyaError>) -> Void) {
         provider.request(.deleteRoute(routeId), completion: completion)
+    }
+    
+    public func deleteRoutes(_ routeIds: [String], completion: @escaping (Result<Response, MoyaError>) -> Void) {
+        provider.request(.deleteRoutes(routeIds), completion: completion)
+    }
+    
+    // MARK: - 更新路线
+    public func updateRoute(params: [String : Any], completion: @escaping (Result<Response, MoyaError>) -> Void) {
+        provider.request(.updateRoute(params: params), completion: completion)
     }
     
     // MARK: - 获取用户兴趣点列表
@@ -71,12 +81,12 @@ public class MapService {
     
     // MARK: - 获取天气数据
     @available(iOS 13.0, *)
-    public func getWeatherMap() async throws -> Response {
-        return try await provider.request(.getWeatherMap)
+    public func getCityWeatherList() async throws -> Response {
+        return try await provider.request(.getCityWeatherList)
     }
     
-    public func getWeatherMap(completion: @escaping (Result<Response, MoyaError>) -> Void) {
-        provider.request(.getWeatherMap, completion: completion)
+    public func getCityWeatherList(completion: @escaping (Result<Response, MoyaError>) -> Void) {
+        provider.request(.getCityWeatherList, completion: completion)
     }
     
     // MARK: - 搜索数据
@@ -129,14 +139,9 @@ public class MapService {
         provider.request(.saveUserRoute(params: params), completion: completion)
     }
     
-    // MARK: - 保存轨迹
-    @available(iOS 13.0, *)
-    public func saveUserTrack(name: String, fileUrl: String)  async throws -> Response {
-        return try await provider.request(.saveUserTrack(name: name, fileUrl: fileUrl))
-    }
-    
-    public func saveUserTrack(name: String, fileUrl: String, completion: @escaping (Result<Response, MoyaError>) -> Void) {
-        provider.request(.saveUserTrack(name: name, fileUrl: fileUrl), completion: completion)
+    // MARK: - 获取天气信息
+    public func getWeatherInfo(_ location: CLLocationCoordinate2D, completion: @escaping (Result<Response, MoyaError>) -> Void) {
+        provider.request(.getWeatherInfo(location), completion: completion)
     }
     
     // MARK: - 获取天气预警
@@ -232,5 +237,15 @@ public class MapService {
     
     public func cancelCheckInPublicPOI(_ poiId: String, completion: @escaping (Result<Response, MoyaError>) -> Void) {
         provider.request(.cancelCheckInPublicPOI(poiId), completion: completion)
+    }
+
+    // MARK: - 路线规划
+
+    /// 路线规划（回调）
+    /// - Parameters:
+    ///   - request: 路线规划请求
+    ///   - completion: 完成回调
+    func planRoute(_ request: RoutePlanRequest, completion: @escaping (Result<Response, MoyaError>) -> Void) {
+        provider.request(.routePlan(request), completion: completion)
     }
 }

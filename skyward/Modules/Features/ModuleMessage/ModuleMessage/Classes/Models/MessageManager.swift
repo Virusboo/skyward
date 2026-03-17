@@ -99,7 +99,7 @@ class MessageManager {
             nickname = "天行探索平台"
             userType = 9
         } else if noticeType == 4 {
-            nickname = (UserManager.shared.emergencyContact?.name ?? UserManager.shared.emergencyContact?.phone) ?? "紧急联系人"
+            nickname = (UserManager.shared.emergencyContact?.first?.name ?? UserManager.shared.emergencyContact?.first?.phone) ?? "紧急联系人"
             userType = 2
         } else if noticeType == 5 {
             nickname = "紧急通讯消息成功通知"

@@ -25,12 +25,14 @@ public enum DBTableName: String {
     case route = "routeTable"
     case routePoint = "routePointTable"
     case miniDevice = "miniDeviceTable"
+    case userPOI = "userPOITable"
+    case userPublicPOI = "userPublicPOITable"
 }
 
 
 public class DBManager: NSObject {
     public static let shared  = DBManager()
-    var dataBase: Database?
+    private var dataBase: Database?
     
     /// 初始化数据库
     public func initDb(userId: String) {

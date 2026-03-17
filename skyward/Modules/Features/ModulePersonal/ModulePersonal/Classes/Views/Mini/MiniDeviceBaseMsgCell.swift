@@ -8,6 +8,7 @@
 
 import UIKit
 import SWKit
+import SWTheme
 
 class MiniDeviceBaseMsgCell: UITableViewCell {
     
@@ -43,7 +44,7 @@ class MiniDeviceBaseMsgCell: UITableViewCell {
     
     private func setupUI() {
         selectionStyle = .none
-        backgroundColor = UIColor(str: "#F2F3F4")
+        backgroundColor = ThemeManager.current.mediumGrayBGColor
         
         bgView.backgroundColor = .white
         bgView.layer.cornerRadius = 8
@@ -252,7 +253,7 @@ class MiniDeviceBaseMsgCell: UITableViewCell {
             connectionStatusLabel.backgroundColor = UIColor(hex: "#DFF5EA")
             
             connectionButton.setTitle("断开", for: .normal)
-            connectionButton.backgroundColor = UIColor(hex: "#F2F3F4")
+            connectionButton.backgroundColor = ThemeManager.current.mediumGrayBGColor
             connectionButton.setTitleColor(UIColor(hex: "#FE6A00"), for: .normal)
             
 //            messageButton.isHidden = false

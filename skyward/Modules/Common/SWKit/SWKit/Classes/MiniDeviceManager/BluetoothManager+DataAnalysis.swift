@@ -1029,7 +1029,7 @@ public extension BluetoothManager {
         // 7. 解析设备ID/IMEI (8字节)
         guard offset + 8 <= manufacturerData.count else { return nil }
         let deviceIdData = manufacturerData.subdata(in: offset..<offset + 8)
-        print(" 设备ID(IMEI)的数据: \(deviceIdData.hexString)")
+//        print(" 设备ID(IMEI)的数据: \(deviceIdData.hexString)")
         let deviceId = parseDeviceId(deviceIdData)
         
 //        print("✅ 解析到BLE广播数据:")
@@ -1087,10 +1087,17 @@ public func formatVersion(_ version: UInt32) -> String {
     return "v\(major).\(minor).\(patch).\(build)"
 }
 
+public func formatHardware(_ version: UInt32) -> String {
+    let major = (version >> 24) & 0xFF
+    let minor = (version >> 16) & 0xFF
+    let patch = (version >> 8) & 0xFF
+    let build = version & 0xFF
+    return "\(major).\(minor).\(patch).\(build)"
+}
+
 public func formatVersion(_ version: UInt16) -> String {
     let major = (version >> 8) & 0xFF
     let build = version & 0xFF
     return "v\(major).\(build)"
 }
-
 

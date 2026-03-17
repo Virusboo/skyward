@@ -88,6 +88,7 @@ class PositionReportSelectionView: UIView {
         stackView.axis = .horizontal
         stackView.alignment = .center
         stackView.distribution = .equalSpacing
+        stackView.isUserInteractionEnabled = false
         
         let titleLabel = UILabel()
         titleLabel.text = title

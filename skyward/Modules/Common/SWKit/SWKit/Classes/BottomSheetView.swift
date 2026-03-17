@@ -22,7 +22,7 @@ public struct BottomSheetConfig {
     public init(heightPercentages: [CGFloat] = [0.3, 0.5, 0.8],
          cornerRadius: CGFloat = 12,
          handleBarHeight: CGFloat = 24,
-         backgroundColor: UIColor = .systemBackground,
+         backgroundColor: UIColor = .white,
          dimColor: UIColor = .black,
          dimAlpha: CGFloat = 0.4,
          animationDuration: TimeInterval = 0.3,
@@ -239,7 +239,7 @@ public class BottomSheetView: UIView {
     }
     
     private func setupHandleBar() {
-        handleBar.backgroundColor = UIColor.systemGray3.withAlphaComponent(0.8)
+        handleBar.backgroundColor = UIColor(str: "#A0A3A7").withAlphaComponent(0.8)
         handleBar.layer.cornerRadius = 5
         handleBar.frame = CGRect(
             x: (screenWidth - 40) / 2,
